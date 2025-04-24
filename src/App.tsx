@@ -8,6 +8,9 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./components/providers/AuthProvider";
 import Index from "./pages/Index";
 import AuthPage from "./pages/AuthPage";
+import SetupVault from "./pages/SetupVault";
+import EventBrowser from "./pages/EventBrowser";
+import StintPlanner from "./pages/StintPlanner";
 import NotFound from "./pages/NotFound";
 
 // Create a client
@@ -25,6 +28,9 @@ const App = () => {
               <Routes>
                 <Route path="/" element={<AuthPage />} />
                 <Route path="/dashboard" element={<Index />} />
+                <Route path="/setups" element={<SetupVault />} />
+                <Route path="/events" element={<EventBrowser />} />
+                <Route path="/stints" element={<StintPlanner />} />
                 <Route path="*" element={<NotFound />} />
               </Routes>
             </AuthProvider>

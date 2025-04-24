@@ -9,6 +9,169 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      driver_availability: {
+        Row: {
+          created_at: string
+          end_time: string
+          event_id: string
+          id: string
+          profile_id: string
+          start_time: string
+        }
+        Insert: {
+          created_at?: string
+          end_time: string
+          event_id: string
+          id?: string
+          profile_id: string
+          start_time: string
+        }
+        Update: {
+          created_at?: string
+          end_time?: string
+          event_id?: string
+          id?: string
+          profile_id?: string
+          start_time?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "driver_availability_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "driver_availability_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      event_rsvps: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          profile_id: string
+          role: string
+          status: string
+          team_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          profile_id: string
+          role?: string
+          status: string
+          team_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          profile_id?: string
+          role?: string
+          status?: string
+          team_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_rsvps_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_rsvps_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "event_rsvps_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          car_class: string
+          created_at: string
+          creator_id: string
+          description: string | null
+          end_time: string | null
+          estimated_duration: number | null
+          id: string
+          race_format: string
+          sim_platform: Database["public"]["Enums"]["sim_platform"]
+          start_time: string
+          team_id: string | null
+          title: string
+          updated_at: string
+          visibility: string
+        }
+        Insert: {
+          car_class: string
+          created_at?: string
+          creator_id: string
+          description?: string | null
+          end_time?: string | null
+          estimated_duration?: number | null
+          id?: string
+          race_format: string
+          sim_platform: Database["public"]["Enums"]["sim_platform"]
+          start_time: string
+          team_id?: string | null
+          title: string
+          updated_at?: string
+          visibility?: string
+        }
+        Update: {
+          car_class?: string
+          created_at?: string
+          creator_id?: string
+          description?: string | null
+          end_time?: string | null
+          estimated_duration?: number | null
+          id?: string
+          race_format?: string
+          sim_platform?: Database["public"]["Enums"]["sim_platform"]
+          start_time?: string
+          team_id?: string | null
+          title?: string
+          updated_at?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       friends: {
         Row: {
           created_at: string
@@ -139,6 +302,241 @@ export type Database = {
           username?: string
         }
         Relationships: []
+      }
+      setup_comments: {
+        Row: {
+          comment: string
+          created_at: string
+          id: string
+          profile_id: string
+          setup_id: string
+          updated_at: string
+        }
+        Insert: {
+          comment: string
+          created_at?: string
+          id?: string
+          profile_id: string
+          setup_id: string
+          updated_at?: string
+        }
+        Update: {
+          comment?: string
+          created_at?: string
+          id?: string
+          profile_id?: string
+          setup_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "setup_comments_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "setup_comments_setup_id_fkey"
+            columns: ["setup_id"]
+            isOneToOne: false
+            referencedRelation: "setups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      setup_reactions: {
+        Row: {
+          created_at: string
+          id: string
+          profile_id: string
+          reaction_type: string
+          setup_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          profile_id: string
+          reaction_type: string
+          setup_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          profile_id?: string
+          reaction_type?: string
+          setup_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "setup_reactions_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "setup_reactions_setup_id_fkey"
+            columns: ["setup_id"]
+            isOneToOne: false
+            referencedRelation: "setups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      setup_shares: {
+        Row: {
+          created_at: string
+          id: string
+          profile_id: string
+          setup_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          profile_id: string
+          setup_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          profile_id?: string
+          setup_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "setup_shares_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "setup_shares_setup_id_fkey"
+            columns: ["setup_id"]
+            isOneToOne: false
+            referencedRelation: "setups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      setups: {
+        Row: {
+          car_model: string
+          created_at: string
+          description: string | null
+          id: string
+          owner_id: string
+          setup_data: string | null
+          sim_platform: Database["public"]["Enums"]["sim_platform"]
+          team_id: string | null
+          title: string
+          track_name: string
+          updated_at: string
+          visibility: string
+        }
+        Insert: {
+          car_model: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          owner_id: string
+          setup_data?: string | null
+          sim_platform: Database["public"]["Enums"]["sim_platform"]
+          team_id?: string | null
+          title: string
+          track_name: string
+          updated_at?: string
+          visibility?: string
+        }
+        Update: {
+          car_model?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          owner_id?: string
+          setup_data?: string | null
+          sim_platform?: Database["public"]["Enums"]["sim_platform"]
+          team_id?: string | null
+          title?: string
+          track_name?: string
+          updated_at?: string
+          visibility?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "setups_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "setups_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      stints: {
+        Row: {
+          color: string | null
+          created_at: string
+          driver_id: string
+          end_time: string
+          event_id: string
+          id: string
+          start_time: string
+          team_id: string
+          updated_at: string
+        }
+        Insert: {
+          color?: string | null
+          created_at?: string
+          driver_id: string
+          end_time: string
+          event_id: string
+          id?: string
+          start_time: string
+          team_id: string
+          updated_at?: string
+        }
+        Update: {
+          color?: string | null
+          created_at?: string
+          driver_id?: string
+          end_time?: string
+          event_id?: string
+          id?: string
+          start_time?: string
+          team_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stints_driver_id_fkey"
+            columns: ["driver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stints_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stints_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       team_members: {
         Row: {
