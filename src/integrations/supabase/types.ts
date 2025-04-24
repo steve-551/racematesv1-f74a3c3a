@@ -9,7 +9,211 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      friends: {
+        Row: {
+          created_at: string
+          id: string
+          receiver_id: string
+          sender_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          receiver_id: string
+          sender_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          receiver_id?: string
+          sender_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "friends_receiver_id_fkey"
+            columns: ["receiver_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "friends_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      iracing_ratings: {
+        Row: {
+          discipline: Database["public"]["Enums"]["discipline_type"]
+          id: string
+          irating: number | null
+          licence_class: Database["public"]["Enums"]["licence_class"] | null
+          profile_id: string
+          safety_rating: number | null
+          time_trial_rating: number | null
+        }
+        Insert: {
+          discipline: Database["public"]["Enums"]["discipline_type"]
+          id?: string
+          irating?: number | null
+          licence_class?: Database["public"]["Enums"]["licence_class"] | null
+          profile_id: string
+          safety_rating?: number | null
+          time_trial_rating?: number | null
+        }
+        Update: {
+          discipline?: Database["public"]["Enums"]["discipline_type"]
+          id?: string
+          irating?: number | null
+          licence_class?: Database["public"]["Enums"]["licence_class"] | null
+          profile_id?: string
+          safety_rating?: number | null
+          time_trial_rating?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "iracing_ratings_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          avatar_url: string | null
+          created_at: string
+          disciplines:
+            | Database["public"]["Enums"]["driving_discipline"][]
+            | null
+          driving_styles: Database["public"]["Enums"]["driving_style"][] | null
+          id: string
+          onboarding_complete: boolean | null
+          preferred_roles: Database["public"]["Enums"]["team_role"][] | null
+          sim_platforms: Database["public"]["Enums"]["sim_platform"][] | null
+          skill_level: Database["public"]["Enums"]["skill_level"] | null
+          timezone: string | null
+          updated_at: string
+          username: string
+        }
+        Insert: {
+          avatar_url?: string | null
+          created_at?: string
+          disciplines?:
+            | Database["public"]["Enums"]["driving_discipline"][]
+            | null
+          driving_styles?: Database["public"]["Enums"]["driving_style"][] | null
+          id: string
+          onboarding_complete?: boolean | null
+          preferred_roles?: Database["public"]["Enums"]["team_role"][] | null
+          sim_platforms?: Database["public"]["Enums"]["sim_platform"][] | null
+          skill_level?: Database["public"]["Enums"]["skill_level"] | null
+          timezone?: string | null
+          updated_at?: string
+          username: string
+        }
+        Update: {
+          avatar_url?: string | null
+          created_at?: string
+          disciplines?:
+            | Database["public"]["Enums"]["driving_discipline"][]
+            | null
+          driving_styles?: Database["public"]["Enums"]["driving_style"][] | null
+          id?: string
+          onboarding_complete?: boolean | null
+          preferred_roles?: Database["public"]["Enums"]["team_role"][] | null
+          sim_platforms?: Database["public"]["Enums"]["sim_platform"][] | null
+          skill_level?: Database["public"]["Enums"]["skill_level"] | null
+          timezone?: string | null
+          updated_at?: string
+          username?: string
+        }
+        Relationships: []
+      }
+      team_members: {
+        Row: {
+          id: string
+          joined_at: string
+          profile_id: string
+          role: Database["public"]["Enums"]["team_role"]
+          team_id: string
+        }
+        Insert: {
+          id?: string
+          joined_at?: string
+          profile_id: string
+          role: Database["public"]["Enums"]["team_role"]
+          team_id: string
+        }
+        Update: {
+          id?: string
+          joined_at?: string
+          profile_id?: string
+          role?: Database["public"]["Enums"]["team_role"]
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          created_at: string
+          id: string
+          logo_url: string | null
+          name: string
+          owner_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name: string
+          owner_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name?: string
+          owner_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teams_owner_id_fkey"
+            columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +222,43 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      discipline_type: "Road" | "Oval" | "DirtOval" | "DirtRoad" | "RallyX"
+      driving_discipline:
+        | "GT3"
+        | "GT4"
+        | "LMP"
+        | "F1"
+        | "NASCAR"
+        | "Oval"
+        | "RallyX"
+        | "Dirt"
+        | "Touring"
+        | "Endurance"
+      driving_style:
+        | "Clean"
+        | "Aggressive"
+        | "Strategic"
+        | "Defensive"
+        | "Consistent"
+        | "Quick"
+        | "Methodical"
+      licence_class: "Rookie" | "D" | "C" | "B" | "A" | "Pro" | "Pro WC"
+      sim_platform:
+        | "iRacing"
+        | "ACC"
+        | "GT7"
+        | "rFactor"
+        | "F1"
+        | "Automobilista"
+        | "RaceRoom"
+      skill_level:
+        | "Beginner"
+        | "Intermediate"
+        | "Advanced"
+        | "Expert"
+        | "Pro"
+        | "Pro WC"
+      team_role: "Driver" | "Strategist" | "Manager" | "Coach" | "Engineer"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +373,48 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      discipline_type: ["Road", "Oval", "DirtOval", "DirtRoad", "RallyX"],
+      driving_discipline: [
+        "GT3",
+        "GT4",
+        "LMP",
+        "F1",
+        "NASCAR",
+        "Oval",
+        "RallyX",
+        "Dirt",
+        "Touring",
+        "Endurance",
+      ],
+      driving_style: [
+        "Clean",
+        "Aggressive",
+        "Strategic",
+        "Defensive",
+        "Consistent",
+        "Quick",
+        "Methodical",
+      ],
+      licence_class: ["Rookie", "D", "C", "B", "A", "Pro", "Pro WC"],
+      sim_platform: [
+        "iRacing",
+        "ACC",
+        "GT7",
+        "rFactor",
+        "F1",
+        "Automobilista",
+        "RaceRoom",
+      ],
+      skill_level: [
+        "Beginner",
+        "Intermediate",
+        "Advanced",
+        "Expert",
+        "Pro",
+        "Pro WC",
+      ],
+      team_role: ["Driver", "Strategist", "Manager", "Coach", "Engineer"],
+    },
   },
 } as const
