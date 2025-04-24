@@ -1,5 +1,5 @@
 
-import { useEffect } from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -18,13 +18,18 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         if (event === 'SIGNED_IN') {
           // Redirect based on onboarding status
           setTimeout(async () => {
-            const { data } = await supabase
-              .from('profiles')
-              .select('onboarding_complete')
-              .eq('id', session?.user.id)
-              .single();
-            
-            navigate(data?.onboarding_complete ? '/dashboard' : '/onboarding');
+            try {
+              const { data } = await supabase
+                .from('profiles')
+                .select('onboarding_complete')
+                .eq('id', session?.user.id)
+                .single();
+              
+              navigate(data?.onboarding_complete ? '/dashboard' : '/onboarding');
+            } catch (error) {
+              console.error('Error checking onboarding status:', error);
+              navigate('/dashboard');
+            }
           }, 0);
         }
       }
