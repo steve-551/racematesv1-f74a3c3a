@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables, TablesInsert } from '@/integrations/supabase/types';
@@ -203,10 +204,14 @@ export const useRacerStore = create<RacerState>((set, get) => ({
             if (racer.iracing_stats.license_class !== value) {
               return false;
             }
-          } else if (key === 'iracing_stats.irating' && Array.isArray(value)) {
-            const range = value as [number, number];
-            if (racer.iracing_stats.irating < range[0] || racer.iracing_stats.irating > range[1]) {
-              return false;
+          } else if (key === 'iracing_stats.irating') {
+            // Fix: Check if value is specifically a tuple of [number, number]
+            if (Array.isArray(value) && value.length === 2 && 
+                typeof value[0] === 'number' && typeof value[1] === 'number') {
+              const range = value as [number, number];
+              if (racer.iracing_stats.irating < range[0] || racer.iracing_stats.irating > range[1]) {
+                return false;
+              }
             }
           } else if (key === 'looking_for_team') {
             if (racer.looking_for_team !== value) {
