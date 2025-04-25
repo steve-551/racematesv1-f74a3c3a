@@ -269,7 +269,7 @@ export const useRacerStore = create<RacerStore>((set, get) => ({
       const { mockMode } = get();
 
       if (mockMode) {
-        set({ allRacers: MOCK_RACERS, filteredRacers: MOCK_RACERS, isLoading: false });
+        set({ allRacers: MOCK_RACERS, filteredRacers: MOCK_RACERS, isLoading: true });
         return;
       }
 
