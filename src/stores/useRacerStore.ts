@@ -27,7 +27,9 @@ interface Racer {
   xp_level: number;
   xp_points: number;
   xp_tier: XpTier;
+  sim_platforms: string[];
   reputation: number;
+  preferred_roles: string[];
   looking_for_team: boolean;
   statsByDiscipline: {
     road: RacerStats;
