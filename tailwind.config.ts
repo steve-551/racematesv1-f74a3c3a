@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -18,6 +19,10 @@ export default {
 			}
 		},
 		extend: {
+			fontFamily: {
+				rajdhani: ['Rajdhani', 'sans-serif'],
+				orbitron: ['Orbitron', 'sans-serif'],
+			},
 			colors: {
 				border: 'hsl(var(--border))',
 				input: 'hsl(var(--input))',
@@ -61,6 +66,29 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Racing theme colors
+				racing: {
+					'dark': '#0D0D0D',
+					'dark-alt': '#1E1E1E',
+					'red': '#DC2626',
+					'red-hover': '#B91C1C',
+				},
+				license: {
+					'rookie': '#FF4D4D',
+					'D': '#FF9900',
+					'C': '#FFFF00',
+					'B': '#00FF00',
+					'A': '#00BFFF',
+					'pro': '#8A2BE2',
+					'black': '#000000',
+				},
+				xp: {
+					'bronze': '#CD7F32',
+					'silver': '#C0C0C0',
+					'gold': '#FFD700',
+					'platinum': '#E5E4E2',
+					'pro': '#9370DB',
 				}
 			},
 			borderRadius: {
@@ -84,11 +112,20 @@ export default {
 					to: {
 						height: '0'
 					}
+				},
+				'pulse-glow': {
+					'0%, 100%': { 
+						boxShadow: '0 0 5px rgba(220, 38, 38, 0.5)'
+					},
+					'50%': { 
+						boxShadow: '0 0 15px rgba(220, 38, 38, 0.8)'
+					},
 				}
 			},
 			animation: {
 				'accordion-down': 'accordion-down 0.2s ease-out',
-				'accordion-up': 'accordion-up 0.2s ease-out'
+				'accordion-up': 'accordion-up 0.2s ease-out',
+				'pulse-glow': 'pulse-glow 2s infinite'
 			}
 		}
 	},
