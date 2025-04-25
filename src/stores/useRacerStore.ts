@@ -35,19 +35,18 @@ interface RacerStore {
   currentRacer: Racer | null;
   mockMode: boolean;
   fetchRacerById: (id: string) => Promise<void>;
+  fetchCurrentRacerProfile: () => Promise<void>;
 }
 
 export const useRacerStore = create<RacerStore>((set) => ({
   currentRacer: null,
-  mockMode: false, // We will control this later
-  
+  mockMode: false,
+
   fetchRacerById: async (id) => {
     const { mockMode } = useRacerStore.getState();
 
     if (mockMode) {
-      console.warn('Mock mode enabled — fetching mock racer');
-      // Load mock data instead
-      const mockRacer = MOCK_RACERS.find(r => r.id === id);
+      const mockRacer = MOCK_RACERS.find((r) => r.id === id);
       if (mockRacer) {
         set({ currentRacer: mockRacer });
       }
@@ -136,8 +135,23 @@ export const useRacerStore = create<RacerStore>((set) => ({
       },
     });
   },
+
+  fetchCurrentRacerProfile: async () => {
+    const {
+      data: { user },
+      error,
+    } = await supabase.auth.getUser();
+
+    if (error || !user) {
+      console.error('Unable to fetch user profile:', error?.message);
+      return;
+    }
+
+    await useRacerStore.getState().fetchRacerById(user.id);
+  },
 }));
-// ✅ Paste the mock racers below this line
+
+// ✅ Mock data fallback
 const MOCK_RACERS: Racer[] = [
   {
     id: '1',
@@ -159,7 +173,6 @@ const MOCK_RACERS: Racer[] = [
       dirt_oval: { irating: 0, sr: 0, licence: 'rookie', tt: 0 },
       dirt_road: { irating: 0, sr: 0, licence: 'rookie', tt: 0 },
       rx: { irating: 0, sr: 0, licence: 'rookie', tt: 0 },
-    }
+    },
   },
-  // ...add more racers here
 ];
