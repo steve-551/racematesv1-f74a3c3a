@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useRacerStore, Platform, RoleTag, LicenseClass } from '@/stores/useRacerStore';
+import { useRacerStore, Platform, RoleTag as RoleTagType, LicenseClass } from '@/stores/useRacerStore';
 import AppLayout from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -13,7 +13,7 @@ import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import RoleTag as RoleTagComponent from '@/components/racer/RoleTag';
+import RoleTag from '@/components/racer/RoleTag';
 
 const MyRacerProfile: React.FC = () => {
   const { currentRacer, fetchCurrentRacerProfile, updateRacerProfile, toggleLookingForTeam } = useRacerStore();
@@ -28,7 +28,7 @@ const MyRacerProfile: React.FC = () => {
     },
     platforms: [] as Platform[],
     driving_styles: [] as string[],
-    role_tags: [] as RoleTag[],
+    role_tags: [] as RoleTagType[],
     region: '',
     timezone: '',
     looking_for_team: false
@@ -375,7 +375,7 @@ const MyRacerProfile: React.FC = () => {
                   <CardContent>
                     <div className="flex flex-wrap gap-2 mb-4">
                       {currentRacer.role_tags.map(role => (
-                        <RoleTagComponent key={role} role={role} />
+                        <RoleTag key={role} role={role} />
                       ))}
                     </div>
                     
