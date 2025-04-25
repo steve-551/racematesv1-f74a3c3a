@@ -207,7 +207,7 @@ export const useRacerStore = create<RacerStore>((set, get) => ({
 
       if (mockMode) {
         // Return first 3 mock racers as recommendations
-        set({ recommendedRacers: MOCK_RACERS.slice(0, 3), isLoading: false });
+        set({ recommendedRacers: MOCK_RACERS.slice(0, 3), isLoading: true });
         return;
       }
 
@@ -269,7 +269,7 @@ export const useRacerStore = create<RacerStore>((set, get) => ({
       const { mockMode } = get();
 
       if (mockMode) {
-        set({ allRacers: MOCK_RACERS, filteredRacers: MOCK_RACERS, isLoading: true });
+        set({ allRacers: MOCK_RACERS, filteredRacers: MOCK_RACERS, isLoading: false });
         return;
       }
 
