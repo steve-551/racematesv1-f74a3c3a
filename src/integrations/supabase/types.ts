@@ -9,6 +9,44 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      availability_slots: {
+        Row: {
+          created_at: string | null
+          day_of_week: string | null
+          end_time: string | null
+          id: string
+          start_time: string | null
+          timezone: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          day_of_week?: string | null
+          end_time?: string | null
+          id?: string
+          start_time?: string | null
+          timezone?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          day_of_week?: string | null
+          end_time?: string | null
+          id?: string
+          start_time?: string | null
+          timezone?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "availability_slots_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       chat_messages: {
         Row: {
           chat_room_id: string
@@ -467,11 +505,31 @@ export type Database = {
             | null
           driving_styles: Database["public"]["Enums"]["driving_style"][] | null
           id: string
+          irating_dirt_oval: number | null
+          irating_dirt_road: number | null
+          irating_oval: number | null
+          irating_road: number | null
+          irating_rx: number | null
+          licence_dirt_oval: string | null
+          licence_dirt_road: string | null
+          licence_oval: string | null
+          licence_road: string | null
+          licence_rx: string | null
           onboarding_complete: boolean | null
           preferred_roles: Database["public"]["Enums"]["team_role"][] | null
           sim_platforms: Database["public"]["Enums"]["sim_platform"][] | null
           skill_level: Database["public"]["Enums"]["skill_level"] | null
+          sr_dirt_oval: number | null
+          sr_dirt_road: number | null
+          sr_oval: number | null
+          sr_road: number | null
+          sr_rx: number | null
           timezone: string | null
+          ttrating_dirt_oval: number | null
+          ttrating_dirt_road: number | null
+          ttrating_oval: number | null
+          ttrating_road: number | null
+          ttrating_rx: number | null
           updated_at: string
           username: string
         }
@@ -483,11 +541,31 @@ export type Database = {
             | null
           driving_styles?: Database["public"]["Enums"]["driving_style"][] | null
           id: string
+          irating_dirt_oval?: number | null
+          irating_dirt_road?: number | null
+          irating_oval?: number | null
+          irating_road?: number | null
+          irating_rx?: number | null
+          licence_dirt_oval?: string | null
+          licence_dirt_road?: string | null
+          licence_oval?: string | null
+          licence_road?: string | null
+          licence_rx?: string | null
           onboarding_complete?: boolean | null
           preferred_roles?: Database["public"]["Enums"]["team_role"][] | null
           sim_platforms?: Database["public"]["Enums"]["sim_platform"][] | null
           skill_level?: Database["public"]["Enums"]["skill_level"] | null
+          sr_dirt_oval?: number | null
+          sr_dirt_road?: number | null
+          sr_oval?: number | null
+          sr_road?: number | null
+          sr_rx?: number | null
           timezone?: string | null
+          ttrating_dirt_oval?: number | null
+          ttrating_dirt_road?: number | null
+          ttrating_oval?: number | null
+          ttrating_road?: number | null
+          ttrating_rx?: number | null
           updated_at?: string
           username: string
         }
@@ -499,15 +577,87 @@ export type Database = {
             | null
           driving_styles?: Database["public"]["Enums"]["driving_style"][] | null
           id?: string
+          irating_dirt_oval?: number | null
+          irating_dirt_road?: number | null
+          irating_oval?: number | null
+          irating_road?: number | null
+          irating_rx?: number | null
+          licence_dirt_oval?: string | null
+          licence_dirt_road?: string | null
+          licence_oval?: string | null
+          licence_road?: string | null
+          licence_rx?: string | null
           onboarding_complete?: boolean | null
           preferred_roles?: Database["public"]["Enums"]["team_role"][] | null
           sim_platforms?: Database["public"]["Enums"]["sim_platform"][] | null
           skill_level?: Database["public"]["Enums"]["skill_level"] | null
+          sr_dirt_oval?: number | null
+          sr_dirt_road?: number | null
+          sr_oval?: number | null
+          sr_road?: number | null
+          sr_rx?: number | null
           timezone?: string | null
+          ttrating_dirt_oval?: number | null
+          ttrating_dirt_road?: number | null
+          ttrating_oval?: number | null
+          ttrating_road?: number | null
+          ttrating_rx?: number | null
           updated_at?: string
           username?: string
         }
         Relationships: []
+      }
+      reputation: {
+        Row: {
+          created_at: string | null
+          event_id: string | null
+          id: string
+          notes: string | null
+          rating: string
+          reviewer_id: string | null
+          target_user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          event_id?: string | null
+          id?: string
+          notes?: string | null
+          rating: string
+          reviewer_id?: string | null
+          target_user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          event_id?: string | null
+          id?: string
+          notes?: string | null
+          rating?: string
+          reviewer_id?: string | null
+          target_user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "reputation_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reputation_reviewer_id_fkey"
+            columns: ["reviewer_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "reputation_target_user_id_fkey"
+            columns: ["target_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       setup_comments: {
         Row: {
@@ -744,6 +894,61 @@ export type Database = {
           },
         ]
       }
+      team_invites: {
+        Row: {
+          created_at: string | null
+          id: string
+          invited_by_user_id: string | null
+          invited_user_id: string | null
+          message: string | null
+          responded_at: string | null
+          status: string | null
+          team_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          invited_by_user_id?: string | null
+          invited_user_id?: string | null
+          message?: string | null
+          responded_at?: string | null
+          status?: string | null
+          team_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          invited_by_user_id?: string | null
+          invited_user_id?: string | null
+          message?: string | null
+          responded_at?: string | null
+          status?: string | null
+          team_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_invites_invited_by_user_id_fkey"
+            columns: ["invited_by_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_invites_invited_user_id_fkey"
+            columns: ["invited_user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_invites_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       team_members: {
         Row: {
           id: string
@@ -818,6 +1023,38 @@ export type Database = {
           },
         ]
       }
+      user_tags: {
+        Row: {
+          created_at: string | null
+          id: string
+          tag: string
+          tag_type: string | null
+          user_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          tag: string
+          tag_type?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          tag?: string
+          tag_type?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_tags_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_xp: {
         Row: {
           created_at: string
@@ -850,6 +1087,135 @@ export type Database = {
           },
         ]
       }
+      users: {
+        Row: {
+          available_now: boolean | null
+          avatar_url: string | null
+          bio: string | null
+          created_at: string | null
+          driving_styles: string[] | null
+          email: string | null
+          full_name: string | null
+          id: string
+          irating_dirt_oval: number | null
+          irating_dirt_road: number | null
+          irating_oval: number | null
+          irating_road: number | null
+          irating_rx: number | null
+          is_onboarded: boolean | null
+          level: number | null
+          licence_dirt_oval: string | null
+          licence_dirt_road: string | null
+          licence_oval: string | null
+          licence_road: string | null
+          licence_rx: string | null
+          looking_for_team: boolean | null
+          platforms: string[] | null
+          region: string | null
+          sr_dirt_oval: number | null
+          sr_dirt_road: number | null
+          sr_oval: number | null
+          sr_road: number | null
+          sr_rx: number | null
+          team_roles: string[] | null
+          thumbs_down: number | null
+          thumbs_up: number | null
+          timezone: string | null
+          ttrating_dirt_oval: number | null
+          ttrating_dirt_road: number | null
+          ttrating_oval: number | null
+          ttrating_road: number | null
+          ttrating_rx: number | null
+          updated_at: string | null
+          username: string
+          xp: number | null
+        }
+        Insert: {
+          available_now?: boolean | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          driving_styles?: string[] | null
+          email?: string | null
+          full_name?: string | null
+          id: string
+          irating_dirt_oval?: number | null
+          irating_dirt_road?: number | null
+          irating_oval?: number | null
+          irating_road?: number | null
+          irating_rx?: number | null
+          is_onboarded?: boolean | null
+          level?: number | null
+          licence_dirt_oval?: string | null
+          licence_dirt_road?: string | null
+          licence_oval?: string | null
+          licence_road?: string | null
+          licence_rx?: string | null
+          looking_for_team?: boolean | null
+          platforms?: string[] | null
+          region?: string | null
+          sr_dirt_oval?: number | null
+          sr_dirt_road?: number | null
+          sr_oval?: number | null
+          sr_road?: number | null
+          sr_rx?: number | null
+          team_roles?: string[] | null
+          thumbs_down?: number | null
+          thumbs_up?: number | null
+          timezone?: string | null
+          ttrating_dirt_oval?: number | null
+          ttrating_dirt_road?: number | null
+          ttrating_oval?: number | null
+          ttrating_road?: number | null
+          ttrating_rx?: number | null
+          updated_at?: string | null
+          username: string
+          xp?: number | null
+        }
+        Update: {
+          available_now?: boolean | null
+          avatar_url?: string | null
+          bio?: string | null
+          created_at?: string | null
+          driving_styles?: string[] | null
+          email?: string | null
+          full_name?: string | null
+          id?: string
+          irating_dirt_oval?: number | null
+          irating_dirt_road?: number | null
+          irating_oval?: number | null
+          irating_road?: number | null
+          irating_rx?: number | null
+          is_onboarded?: boolean | null
+          level?: number | null
+          licence_dirt_oval?: string | null
+          licence_dirt_road?: string | null
+          licence_oval?: string | null
+          licence_road?: string | null
+          licence_rx?: string | null
+          looking_for_team?: boolean | null
+          platforms?: string[] | null
+          region?: string | null
+          sr_dirt_oval?: number | null
+          sr_dirt_road?: number | null
+          sr_oval?: number | null
+          sr_road?: number | null
+          sr_rx?: number | null
+          team_roles?: string[] | null
+          thumbs_down?: number | null
+          thumbs_up?: number | null
+          timezone?: string | null
+          ttrating_dirt_oval?: number | null
+          ttrating_dirt_road?: number | null
+          ttrating_oval?: number | null
+          ttrating_road?: number | null
+          ttrating_rx?: number | null
+          updated_at?: string | null
+          username?: string
+          xp?: number | null
+        }
+        Relationships: []
+      }
       xp_actions: {
         Row: {
           action_type: string
@@ -873,6 +1239,61 @@ export type Database = {
           xp_value?: number
         }
         Relationships: []
+      }
+      xp_history: {
+        Row: {
+          action_type: string | null
+          amount: number | null
+          created_at: string | null
+          description: string | null
+          id: string
+          related_event_id: string | null
+          related_setup_id: string | null
+          user_id: string | null
+        }
+        Insert: {
+          action_type?: string | null
+          amount?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          related_event_id?: string | null
+          related_setup_id?: string | null
+          user_id?: string | null
+        }
+        Update: {
+          action_type?: string | null
+          amount?: number | null
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          related_event_id?: string | null
+          related_setup_id?: string | null
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "xp_history_related_event_id_fkey"
+            columns: ["related_event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "xp_history_related_setup_id_fkey"
+            columns: ["related_setup_id"]
+            isOneToOne: false
+            referencedRelation: "setups"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "xp_history_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "users"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       xp_transactions: {
         Row: {

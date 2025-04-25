@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "./components/providers/AuthProvider";
+import { ProfileProvider } from "./components/providers/ProfileProvider";
 import Index from "./pages/Index";
 import AuthPage from "./pages/AuthPage";
 import Dashboard from "./pages/Dashboard";
@@ -30,18 +31,20 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <AuthProvider>
-              <Routes>
-                <Route path="/" element={<AuthPage />} />
-                <Route path="/dashboard" element={<Dashboard />} />
-                <Route path="/setups" element={<SetupVault />} />
-                <Route path="/events" element={<EventBrowser />} />
-                <Route path="/stints" element={<StintPlanner />} />
-                <Route path="/find-racers" element={<FindRacers />} />
-                <Route path="/racers/:id" element={<RacerProfile />} />
-                <Route path="/profile" element={<MyRacerProfile />} />
-                <Route path="/onboarding" element={<Onboarding />} />
-                <Route path="*" element={<NotFound />} />
-              </Routes>
+              <ProfileProvider>
+                <Routes>
+                  <Route path="/" element={<AuthPage />} />
+                  <Route path="/dashboard" element={<Dashboard />} />
+                  <Route path="/setups" element={<SetupVault />} />
+                  <Route path="/events" element={<EventBrowser />} />
+                  <Route path="/stints" element={<StintPlanner />} />
+                  <Route path="/find-racers" element={<FindRacers />} />
+                  <Route path="/racers/:id" element={<RacerProfile />} />
+                  <Route path="/profile" element={<MyRacerProfile />} />
+                  <Route path="/onboarding" element={<Onboarding />} />
+                  <Route path="*" element={<NotFound />} />
+                </Routes>
+              </ProfileProvider>
             </AuthProvider>
           </BrowserRouter>
         </TooltipProvider>

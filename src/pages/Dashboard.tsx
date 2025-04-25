@@ -1,3 +1,4 @@
+
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
@@ -6,9 +7,10 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Calendar, Car, Flag, Users, User } from 'lucide-react';
 import { useRacerStore } from '@/stores/useRacerStore';
 import { useTeamStore } from '@/stores/useTeamStore';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const Dashboard: React.FC = () => {
-  const { fetchCurrentRacerProfile, currentRacer, fetchRecommendedRacers, recommendedRacers } = useRacerStore();
+  const { fetchCurrentRacerProfile, currentRacer, fetchRecommendedRacers, recommendedRacers, isLoading } = useRacerStore();
   const { fetchSuggestedTeams, suggestedTeams } = useTeamStore();
 
   useEffect(() => {
@@ -80,10 +82,31 @@ const Dashboard: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {currentRacer ? (
+              {isLoading ? (
+                <div className="space-y-4">
+                  <div className="flex items-center mb-4">
+                    <Skeleton className="h-16 w-16 rounded-full mr-4" />
+                    <div className="space-y-2">
+                      <Skeleton className="h-5 w-32" />
+                      <Skeleton className="h-4 w-24" />
+                    </div>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    <Skeleton className="h-16 w-full" />
+                    <Skeleton className="h-16 w-full" />
+                  </div>
+                </div>
+              ) : currentRacer ? (
                 <div>
                   <div className="flex items-center mb-4">
-                    <img src={currentRacer.avatar_url} alt={currentRacer.display_name} className="h-16 w-16 rounded-full mr-4" />
+                    <img 
+                      src={currentRacer.avatar_url} 
+                      alt={currentRacer.display_name} 
+                      className="h-16 w-16 rounded-full mr-4 object-cover bg-gray-800"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).src = 'https://api.dicebear.com/7.x/avataaars/svg?seed=default';
+                      }}
+                    />
                     <div>
                       <h3 className="font-bold text-lg">{currentRacer.display_name}</h3>
                       <p className="text-sm text-gray-400">
@@ -108,7 +131,7 @@ const Dashboard: React.FC = () => {
                   )}
                 </div>
               ) : (
-                <p className="text-center text-gray-400">Loading profile...</p>
+                <p className="text-center text-gray-400">Profile not available</p>
               )}
             </CardContent>
           </Card>
@@ -124,11 +147,23 @@ const Dashboard: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {recommendedRacers?.length > 0 ? (
+              {isLoading ? (
+                <div className="space-y-4">
+                  <Skeleton className="h-24 w-full" />
+                  <Skeleton className="h-24 w-full" />
+                </div>
+              ) : recommendedRacers && recommendedRacers.length > 0 ? (
                 <div className="space-y-4">
                   {recommendedRacers.slice(0, 2).map(racer => (
                     <div key={racer.id} className="flex items-center p-3 bg-gray-800/50 rounded-md">
-                      <img src={racer.avatar_url} alt={racer.display_name} className="h-12 w-12 rounded-full mr-3" />
+                      <img 
+                        src={racer.avatar_url} 
+                        alt={racer.display_name} 
+                        className="h-12 w-12 rounded-full mr-3 object-cover bg-gray-800"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = 'https://api.dicebear.com/7.x/avataaars/svg?seed=default';
+                        }}
+                      />
                       <div className="flex-1">
                         <h4 className="font-medium">{racer.display_name}</h4>
                         <p className="text-xs text-gray-400">{racer.platforms.join(', ')}</p>
@@ -152,14 +187,26 @@ const Dashboard: React.FC = () => {
               <CardTitle className="font-rajdhani">Suggested Teams</CardTitle>
             </CardHeader>
             <CardContent>
-              {suggestedTeams?.length > 0 ? (
+              {isLoading ? (
+                <div className="space-y-4">
+                  <Skeleton className="h-24 w-full" />
+                  <Skeleton className="h-24 w-full" />
+                </div>
+              ) : suggestedTeams?.length > 0 ? (
                 <div className="space-y-4">
                   {suggestedTeams.map(team => (
                     <div key={team.id} className="flex items-center p-3 bg-gray-800/50 rounded-md">
-                      <img src={team.logo_url} alt={team.name} className="h-12 w-12 rounded-full mr-3" />
+                      <img 
+                        src={team.logo_url} 
+                        alt={team.name} 
+                        className="h-12 w-12 rounded-full mr-3 object-cover bg-gray-800"
+                        onError={(e) => {
+                          (e.target as HTMLImageElement).src = 'https://api.dicebear.com/7.x/initials/svg?seed=' + team.name;
+                        }}
+                      />
                       <div className="flex-1">
                         <h4 className="font-medium">{team.name}</h4>
-                        <p className="text-xs text-gray-400">{team.platforms.join(', ')}</p>
+                        <p className="text-xs text-gray-400">{Array.isArray(team.platforms) ? team.platforms.join(', ') : ''}</p>
                         <div className="mt-2 flex gap-2">
                           <Button size="sm" variant="ghost" className="text-xs h-7 px-2">Join</Button>
                           <Button size="sm" variant="ghost" className="text-xs h-7 px-2">View</Button>
