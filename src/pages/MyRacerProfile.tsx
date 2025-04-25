@@ -56,7 +56,6 @@ const MyRacerProfile: React.FC = () => {
   const handleEditToggle = () => {
     setIsEditing(!isEditing);
     
-    // Reset form when canceling edit
     if (isEditing && currentRacer) {
       setFormData({
         display_name: currentRacer.display_name,
@@ -74,13 +73,12 @@ const MyRacerProfile: React.FC = () => {
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
     
-    // Handle nested objects like iracing_stats
     if (name.includes('.')) {
       const [parent, child] = name.split('.');
       setFormData(prev => ({
         ...prev,
         [parent]: {
-          ...(prev[parent as keyof typeof prev] as object),
+          ...prev[parent as keyof typeof prev] as object,
           [child]: value
         }
       }));
@@ -95,7 +93,7 @@ const MyRacerProfile: React.FC = () => {
   const handleCheckboxChange = (name: 'platforms' | 'driving_styles', value: string, checked: boolean) => {
     setFormData(prev => {
       if (name === 'platforms') {
-        const currentValues = prev.platforms as Platform[];
+        const currentValues = prev.platforms;
         if (checked) {
           return { ...prev, platforms: [...currentValues, value as Platform] };
         } else {
@@ -180,7 +178,6 @@ const MyRacerProfile: React.FC = () => {
           
           <TabsContent value="profile">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* Left Column - Profile Overview */}
               <div className="lg:col-span-1">
                 <Card className="racing-card overflow-hidden">
                   <div className="h-24 bg-gradient-to-r from-gray-800 to-gray-900 relative">
@@ -290,7 +287,7 @@ const MyRacerProfile: React.FC = () => {
                               <label key={platform} className="flex items-center space-x-2">
                                 <input
                                   type="checkbox"
-                                  checked={formData.platforms.includes(platform)}
+                                  checked={formData.platforms.includes(platform as Platform)}
                                   onChange={(e) => handleCheckboxChange('platforms', platform, e.target.checked)}
                                   className="h-4 w-4"
                                 />
@@ -301,7 +298,7 @@ const MyRacerProfile: React.FC = () => {
                         ) : (
                           <div className="flex flex-wrap gap-1 mb-4">
                             {currentRacer.platforms.map(platform => (
-                              <PlatformBadge key={platform} platform={platform as any} />
+                              <PlatformBadge key={platform} platform={platform} />
                             ))}
                           </div>
                         )}
@@ -333,9 +330,7 @@ const MyRacerProfile: React.FC = () => {
                 </Card>
               </div>
               
-              {/* Right Column */}
               <div className="lg:col-span-2">
-                {/* Driving Styles */}
                 <Card className="racing-card mb-6">
                   <CardHeader className="pb-2">
                     <CardTitle className="font-rajdhani">Driving Styles & Preferences</CardTitle>
@@ -373,7 +368,6 @@ const MyRacerProfile: React.FC = () => {
                   </CardContent>
                 </Card>
                 
-                {/* Role Tags */}
                 <Card className="racing-card mb-6">
                   <CardHeader className="pb-2">
                     <CardTitle className="font-rajdhani">Role Tags</CardTitle>
@@ -381,19 +375,7 @@ const MyRacerProfile: React.FC = () => {
                   <CardContent>
                     <div className="flex flex-wrap gap-2 mb-4">
                       {currentRacer.role_tags.map(role => (
-                        <span
-                          key={role}
-                          className={`px-3 py-1 ${
-                            role === 'Driver' ? 'bg-blue-900' : 
-                            role === 'Strategist' ? 'bg-green-900' : 
-                            role === 'Team Manager' ? 'bg-purple-900' :
-                            role === 'Endurance Pro' ? 'bg-amber-900' :
-                            role === 'Sprint Specialist' ? 'bg-red-900' :
-                            role === 'Coach' ? 'bg-cyan-900' : 'bg-gray-800'
-                          } text-white rounded-md text-sm`}
-                        >
-                          {role}
-                        </span>
+                        <RoleTagComponent key={role} role={role} />
                       ))}
                     </div>
                     
@@ -405,7 +387,6 @@ const MyRacerProfile: React.FC = () => {
                   </CardContent>
                 </Card>
                 
-                {/* Reputation */}
                 <Card className="racing-card">
                   <CardHeader className="pb-2">
                     <CardTitle className="flex justify-between items-center font-rajdhani">
@@ -436,7 +417,6 @@ const MyRacerProfile: React.FC = () => {
           
           <TabsContent value="stats">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              {/* iRacing Stats */}
               <Card className="racing-card mb-6 lg:col-span-2">
                 <CardHeader className="pb-2">
                   <CardTitle className="flex justify-between">
@@ -528,7 +508,6 @@ const MyRacerProfile: React.FC = () => {
                 </CardContent>
               </Card>
               
-              {/* Stats by Discipline - Placeholder */}
               <Card className="racing-card lg:col-span-1">
                 <CardHeader className="pb-2">
                   <CardTitle className="font-rajdhani">Stats by Discipline</CardTitle>
