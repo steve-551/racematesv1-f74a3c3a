@@ -11,7 +11,7 @@ import { Progress } from '@/components/ui/progress';
 import { useOnboardingStore } from '@/stores/useOnboardingStore';
 import { toast } from 'sonner';
 import { ArrowLeft, ArrowRight, Check } from 'lucide-react';
-import { useRacerStore, Platform, LicenseClass } from '@/stores/useRacerStore';
+import { useRacerStore, Platform, LicenseClass, RoleTag } from '@/stores/useRacerStore';
 
 const Onboarding: React.FC = () => {
   const { steps, currentStepIndex, setCurrentStep, completeStep, completeOnboarding } = useOnboardingStore();
@@ -31,7 +31,7 @@ const Onboarding: React.FC = () => {
       tt_rating: 1200
     },
     driving_styles: [] as string[],
-    role_tags: [] as string[],
+    role_tags: [] as RoleTag[],
     looking_for_team: false
   });
   
@@ -88,7 +88,7 @@ const Onboarding: React.FC = () => {
       setFormValues(prev => ({
         ...prev,
         [parent]: {
-          ...prev[parent as keyof typeof prev],
+          ...(prev[parent as keyof typeof prev] as object),
           [child]: value
         }
       }));

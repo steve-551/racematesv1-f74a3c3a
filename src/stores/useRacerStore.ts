@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { supabase } from '@/integrations/supabase/client';
 import { Tables, TablesInsert } from '@/integrations/supabase/types';
@@ -183,32 +182,37 @@ export const useRacerStore = create<RacerState>((set, get) => ({
       // For now, we'll just use our mock data and apply filters in memory
       const filteredRacers = MOCK_RACERS.filter(racer => {
         for (const [key, value] of Object.entries(filters)) {
-          if (key === 'platforms' && value) {
-            if (!racer.platforms.some(p => (value as Platform[]).includes(p))) {
+          if (value === undefined) continue;
+          
+          if (key === 'platforms' && Array.isArray(value)) {
+            const platformFilters = value as Platform[];
+            if (!racer.platforms.some(p => platformFilters.includes(p))) {
               return false;
             }
-          } else if (key === 'driving_styles' && value) {
-            if (!racer.driving_styles.some(s => (value as string[]).includes(s))) {
+          } else if (key === 'driving_styles' && Array.isArray(value)) {
+            const styleFilters = value as string[];
+            if (!racer.driving_styles.some(s => styleFilters.includes(s))) {
               return false;
             }
-          } else if (key === 'role_tags' && value) {
-            if (!racer.role_tags.some(r => (value as RoleTag[]).includes(r))) {
+          } else if (key === 'role_tags' && Array.isArray(value)) {
+            const roleFilters = value as RoleTag[];
+            if (!racer.role_tags.some(r => roleFilters.includes(r))) {
               return false;
             }
-          } else if (key === 'iracing_stats.license_class' && value) {
+          } else if (key === 'iracing_stats.license_class') {
             if (racer.iracing_stats.license_class !== value) {
               return false;
             }
-          } else if (key === 'iracing_stats.irating' && value) {
+          } else if (key === 'iracing_stats.irating' && Array.isArray(value)) {
             const range = value as [number, number];
             if (racer.iracing_stats.irating < range[0] || racer.iracing_stats.irating > range[1]) {
               return false;
             }
-          } else if (key === 'looking_for_team' && value !== undefined) {
+          } else if (key === 'looking_for_team') {
             if (racer.looking_for_team !== value) {
               return false;
             }
-          } else if (key === 'region' && value) {
+          } else if (key === 'region') {
             if (racer.region !== value) {
               return false;
             }

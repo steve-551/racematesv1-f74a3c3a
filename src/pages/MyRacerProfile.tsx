@@ -1,6 +1,5 @@
-
 import React, { useEffect, useState } from 'react';
-import { useRacerStore } from '@/stores/useRacerStore';
+import { useRacerStore, Platform, RoleTag, LicenseClass } from '@/stores/useRacerStore';
 import AppLayout from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -14,6 +13,7 @@ import { toast } from 'sonner';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import RoleTag as RoleTagComponent from '@/components/racer/RoleTag';
 
 const MyRacerProfile: React.FC = () => {
   const { currentRacer, fetchCurrentRacerProfile, updateRacerProfile, toggleLookingForTeam } = useRacerStore();
@@ -23,11 +23,12 @@ const MyRacerProfile: React.FC = () => {
     iracing_stats: {
       irating: 0,
       safety_rating: 0,
-      license_class: '' as any,
+      license_class: 'D' as LicenseClass,
       tt_rating: 0
     },
-    platforms: [] as string[],
+    platforms: [] as Platform[],
     driving_styles: [] as string[],
+    role_tags: [] as RoleTag[],
     region: '',
     timezone: '',
     looking_for_team: false
@@ -44,6 +45,7 @@ const MyRacerProfile: React.FC = () => {
         iracing_stats: { ...currentRacer.iracing_stats },
         platforms: [...currentRacer.platforms],
         driving_styles: [...currentRacer.driving_styles],
+        role_tags: [...currentRacer.role_tags],
         region: currentRacer.region,
         timezone: currentRacer.timezone,
         looking_for_team: currentRacer.looking_for_team
@@ -61,6 +63,7 @@ const MyRacerProfile: React.FC = () => {
         iracing_stats: { ...currentRacer.iracing_stats },
         platforms: [...currentRacer.platforms],
         driving_styles: [...currentRacer.driving_styles],
+        role_tags: [...currentRacer.role_tags],
         region: currentRacer.region,
         timezone: currentRacer.timezone,
         looking_for_team: currentRacer.looking_for_team
@@ -77,7 +80,7 @@ const MyRacerProfile: React.FC = () => {
       setFormData(prev => ({
         ...prev,
         [parent]: {
-          ...prev[parent as keyof typeof prev],
+          ...(prev[parent as keyof typeof prev] as object),
           [child]: value
         }
       }));
@@ -89,14 +92,22 @@ const MyRacerProfile: React.FC = () => {
     }
   };
   
-  const handleCheckboxChange = (name: string, value: string, checked: boolean) => {
+  const handleCheckboxChange = (name: 'platforms' | 'driving_styles', value: string, checked: boolean) => {
     setFormData(prev => {
-      const currentValues = prev[name as keyof typeof prev] as string[];
-      
-      if (checked) {
-        return { ...prev, [name]: [...currentValues, value] };
+      if (name === 'platforms') {
+        const currentValues = prev.platforms as Platform[];
+        if (checked) {
+          return { ...prev, platforms: [...currentValues, value as Platform] };
+        } else {
+          return { ...prev, platforms: currentValues.filter(v => v !== value) };
+        }
       } else {
-        return { ...prev, [name]: currentValues.filter(v => v !== value) };
+        const currentValues = prev.driving_styles;
+        if (checked) {
+          return { ...prev, driving_styles: [...currentValues, value] };
+        } else {
+          return { ...prev, driving_styles: currentValues.filter(v => v !== value) };
+        }
       }
     });
   };
