@@ -207,7 +207,7 @@ export const useRacerStore = create<RacerStore>((set, get) => ({
 
       if (mockMode) {
         // Return first 3 mock racers as recommendations
-        set({ recommendedRacers: MOCK_RACERS.slice(0, 3), isLoading: true });
+        set({ recommendedRacers: MOCK_RACERS.slice(0, 3), isLoading: false });
         return;
       }
 
