@@ -55,7 +55,7 @@ export const useRacerStore = create<RacerStore>((set) => ({
     }
 
     const { data, error } = await supabase
-      .from('users')
+      .from('profiles')
       .select(`
         id,
         display_name,
