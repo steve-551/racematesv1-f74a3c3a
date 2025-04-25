@@ -205,12 +205,17 @@ export const useRacerStore = create<RacerState>((set, get) => ({
               return false;
             }
           } else if (key === 'iracing_stats.irating') {
-            // Fix: Check if value is specifically a tuple of [number, number]
-            if (Array.isArray(value) && value.length === 2 && 
-                typeof value[0] === 'number' && typeof value[1] === 'number') {
-              const range = value as [number, number];
-              if (racer.iracing_stats.irating < range[0] || racer.iracing_stats.irating > range[1]) {
-                return false;
+            // Fix: Check if value is specifically a tuple with two numbers
+            // This is the proper way to check if something is a [min, max] range
+            if (Array.isArray(value) && value.length === 2) {
+              // Ensure both elements are numbers before using them as a range
+              const min = Number(value[0]);
+              const max = Number(value[1]);
+              
+              if (!isNaN(min) && !isNaN(max)) {
+                if (racer.iracing_stats.irating < min || racer.iracing_stats.irating > max) {
+                  return false;
+                }
               }
             }
           } else if (key === 'looking_for_team') {
