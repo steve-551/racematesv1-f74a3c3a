@@ -39,7 +39,7 @@ interface RacerStore {
 
 export const useRacerStore = create<RacerStore>((set) => ({
   currentRacer: null,
-  mockMode: true, // We will control this later
+  mockMode: false, // We will control this later
   
   fetchRacerById: async (id) => {
     const { mockMode } = useRacerStore.getState();
