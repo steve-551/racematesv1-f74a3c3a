@@ -9,6 +9,132 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
+      chat_messages: {
+        Row: {
+          chat_room_id: string
+          created_at: string
+          id: string
+          is_pinned: boolean
+          message: string
+          sender_id: string
+          updated_at: string
+        }
+        Insert: {
+          chat_room_id: string
+          created_at?: string
+          id?: string
+          is_pinned?: boolean
+          message: string
+          sender_id: string
+          updated_at?: string
+        }
+        Update: {
+          chat_room_id?: string
+          created_at?: string
+          id?: string
+          is_pinned?: boolean
+          message?: string
+          sender_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_messages_chat_room_id_fkey"
+            columns: ["chat_room_id"]
+            isOneToOne: false
+            referencedRelation: "chat_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_read_status: {
+        Row: {
+          chat_room_id: string
+          created_at: string
+          id: string
+          last_read_message_id: string | null
+          profile_id: string
+          updated_at: string
+        }
+        Insert: {
+          chat_room_id: string
+          created_at?: string
+          id?: string
+          last_read_message_id?: string | null
+          profile_id: string
+          updated_at?: string
+        }
+        Update: {
+          chat_room_id?: string
+          created_at?: string
+          id?: string
+          last_read_message_id?: string | null
+          profile_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_read_status_chat_room_id_fkey"
+            columns: ["chat_room_id"]
+            isOneToOne: false
+            referencedRelation: "chat_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_read_status_last_read_message_id_fkey"
+            columns: ["last_read_message_id"]
+            isOneToOne: false
+            referencedRelation: "chat_messages"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "chat_read_status_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      chat_rooms: {
+        Row: {
+          created_at: string
+          id: string
+          room_type: string
+          team_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          room_type: string
+          team_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          room_type?: string
+          team_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "chat_rooms_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       driver_availability: {
         Row: {
           created_at: string
@@ -245,6 +371,86 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "iracing_ratings_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notifications: {
+        Row: {
+          content: string | null
+          created_at: string
+          id: string
+          is_read: boolean
+          recipient_id: string
+          reference_id: string | null
+          reference_type: string | null
+          title: string
+          type: string
+        }
+        Insert: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          recipient_id: string
+          reference_id?: string | null
+          reference_type?: string | null
+          title: string
+          type: string
+        }
+        Update: {
+          content?: string | null
+          created_at?: string
+          id?: string
+          is_read?: boolean
+          recipient_id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          title?: string
+          type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notifications_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      private_chat_participants: {
+        Row: {
+          chat_room_id: string
+          created_at: string
+          id: string
+          profile_id: string
+        }
+        Insert: {
+          chat_room_id: string
+          created_at?: string
+          id?: string
+          profile_id: string
+        }
+        Update: {
+          chat_room_id?: string
+          created_at?: string
+          id?: string
+          profile_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "private_chat_participants_chat_room_id_fkey"
+            columns: ["chat_room_id"]
+            isOneToOne: false
+            referencedRelation: "chat_rooms"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "private_chat_participants_profile_id_fkey"
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
@@ -606,6 +812,107 @@ export type Database = {
           {
             foreignKeyName: "teams_owner_id_fkey"
             columns: ["owner_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      user_xp: {
+        Row: {
+          created_at: string
+          id: string
+          profile_id: string
+          total_xp: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          profile_id: string
+          total_xp?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          profile_id?: string
+          total_xp?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_xp_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: true
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      xp_actions: {
+        Row: {
+          action_type: string
+          created_at: string
+          description: string
+          id: string
+          xp_value: number
+        }
+        Insert: {
+          action_type: string
+          created_at?: string
+          description: string
+          id?: string
+          xp_value: number
+        }
+        Update: {
+          action_type?: string
+          created_at?: string
+          description?: string
+          id?: string
+          xp_value?: number
+        }
+        Relationships: []
+      }
+      xp_transactions: {
+        Row: {
+          action_id: string
+          created_at: string
+          id: string
+          profile_id: string
+          reference_id: string | null
+          reference_type: string | null
+          xp_amount: number
+        }
+        Insert: {
+          action_id: string
+          created_at?: string
+          id?: string
+          profile_id: string
+          reference_id?: string | null
+          reference_type?: string | null
+          xp_amount: number
+        }
+        Update: {
+          action_id?: string
+          created_at?: string
+          id?: string
+          profile_id?: string
+          reference_id?: string | null
+          reference_type?: string | null
+          xp_amount?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "xp_transactions_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "xp_actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "xp_transactions_profile_id_fkey"
+            columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
