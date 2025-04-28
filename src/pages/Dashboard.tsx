@@ -1,4 +1,3 @@
-
 import React, { useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import AppLayout from '@/components/layout/AppLayout';
@@ -206,7 +205,7 @@ const Dashboard: React.FC = () => {
                       />
                       <div className="flex-1">
                         <h4 className="font-medium">{team.name}</h4>
-                        <p className="text-xs text-gray-400">{Array.isArray(team.platforms) ? team.platforms.join(', ') : ''}</p>
+                        <p className="text-xs text-gray-400">{team.platforms && Array.isArray(team.platforms) ? team.platforms.join(', ') : ''}</p>
                         <div className="mt-2 flex gap-2">
                           <Button size="sm" variant="ghost" className="text-xs h-7 px-2">Join</Button>
                           <Button size="sm" variant="ghost" className="text-xs h-7 px-2">View</Button>

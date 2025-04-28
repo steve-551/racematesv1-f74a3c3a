@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -113,36 +112,7 @@ export const useRacerStore = create<RacerStore>((set, get) => ({
 
       const { data, error } = await supabase
         .from('profiles')
-        .select(`
-          id, 
-          username as display_name,
-          avatar_url,
-          region,
-          timezone,
-          sim_platforms as platforms,
-          driving_styles,
-          preferred_roles as role_tags,
-          xp_level,
-          xp_points,
-          xp_tier,
-          reputation,
-          looking_for_team,
-          full_name,
-          age,
-          bio,
-          career_summary,
-          achievements,
-          future_goals,
-          favorite_disciplines,
-          favorite_car_types,
-          series_focus,
-          commitment_level,
-          availability_hours,
-          road_stats,
-          oval_stats,
-          dirt_oval_stats,
-          dirt_road_stats
-        `)
+        .select('id, username, avatar_url, region, timezone, sim_platforms, driving_styles, preferred_roles, xp_level, xp_points, xp_tier, reputation, looking_for_team, full_name, age, bio, career_summary, achievements, future_goals, favorite_disciplines, favorite_car_types, series_focus, commitment_level, availability_hours, road_stats, oval_stats, dirt_oval_stats, dirt_road_stats')
         .eq('id', id)
         .single();
 
@@ -155,19 +125,19 @@ export const useRacerStore = create<RacerStore>((set, get) => ({
       // Map the DB structure to our frontend structure
       const mappedRacer: Racer = {
         id: data.id,
-        display_name: data.display_name || 'Unknown Racer',
+        display_name: data.username || 'Unknown Racer',
         avatar_url: data.avatar_url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default',
         region: data.region || 'Unknown',
         timezone: data.timezone || 'UTC',
-        platforms: data.platforms || [],
+        platforms: data.sim_platforms || [],
         driving_styles: data.driving_styles || [],
-        role_tags: (data.role_tags || []) as RoleTag[],
+        role_tags: (data.preferred_roles || []) as RoleTag[],
         xp_level: data.xp_level || 1,
         xp_points: data.xp_points || 0,
         xp_tier: (data.xp_tier || 'bronze') as XpTier,
-        sim_platforms: data.platforms || [],
+        sim_platforms: data.sim_platforms || [],
         reputation: data.reputation || 0,
-        preferred_roles: data.role_tags || [],
+        preferred_roles: data.preferred_roles || [],
         looking_for_team: data.looking_for_team || false,
         full_name: data.full_name,
         age: data.age,

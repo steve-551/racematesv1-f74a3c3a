@@ -15,6 +15,7 @@ export interface Team {
   achievements: string;
   created_at: string;
   updated_at: string;
+  platforms?: string[]; // Added this property
 }
 
 export interface TeamMember {
@@ -57,7 +58,8 @@ const MOCK_TEAMS: Team[] = [
     xp_tier: 'platinum',
     achievements: 'Winner of 24h Nürburgring 2023, GT3 Championship runners-up',
     created_at: '2023-01-01',
-    updated_at: '2023-01-01'
+    updated_at: '2023-01-01',
+    platforms: ['iRacing', 'ACC'] // Added platforms
   },
   {
     id: '2',
@@ -70,7 +72,8 @@ const MOCK_TEAMS: Team[] = [
     xp_tier: 'gold',
     achievements: 'Top 3 in Formula Drift Japan Series, Multiple podiums in drift events',
     created_at: '2023-02-15',
-    updated_at: '2023-02-15'
+    updated_at: '2023-02-15',
+    platforms: ['GT7', 'Automobilista'] // Added platforms
   },
   {
     id: '3',
@@ -83,7 +86,8 @@ const MOCK_TEAMS: Team[] = [
     xp_tier: 'pro',
     achievements: 'WRC-2 team champions, Multiple Dakar Rally stage wins',
     created_at: '2022-11-03',
-    updated_at: '2022-11-03'
+    updated_at: '2022-11-03',
+    platforms: ['Dirt Rally', 'rFactor'] // Added platforms
   }
 ];
 
