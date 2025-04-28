@@ -498,13 +498,31 @@ export type Database = {
       }
       profiles: {
         Row: {
+          achievements: string | null
+          age: number | null
+          availability_hours: number | null
           avatar_url: string | null
+          bio: string | null
+          career_summary: string | null
+          commitment_level: string | null
+          cover_url: string | null
           created_at: string
+          dirt_oval_stats: Json | null
+          dirt_road_stats: Json | null
           disciplines:
             | Database["public"]["Enums"]["driving_discipline"][]
             | null
-          driving_styles: Database["public"]["Enums"]["driving_style"][] | null
+          display_name: string | null
+          driving_styles:
+            | Database["public"]["Enums"]["driving_style_enum"][]
+            | null
+          favorite_car_types: string[] | null
+          favorite_disciplines: string[] | null
+          formula_car_stats: Json | null
+          full_name: string | null
+          future_goals: string | null
           id: string
+          iracing_stats: Json | null
           irating_dirt_oval: number | null
           irating_dirt_road: number | null
           irating_oval: number | null
@@ -515,15 +533,25 @@ export type Database = {
           licence_oval: string | null
           licence_road: string | null
           licence_rx: string | null
+          looking_for_team: boolean | null
           onboarding_complete: boolean | null
+          oval_stats: Json | null
+          platforms: string[] | null
           preferred_roles: Database["public"]["Enums"]["team_role"][] | null
+          region: string | null
+          reputation: number | null
+          road_stats: Json | null
+          role_tags: string[] | null
+          series_focus: string[] | null
           sim_platforms: Database["public"]["Enums"]["sim_platform"][] | null
           skill_level: Database["public"]["Enums"]["skill_level"] | null
+          sports_car_stats: Json | null
           sr_dirt_oval: number | null
           sr_dirt_road: number | null
           sr_oval: number | null
           sr_road: number | null
           sr_rx: number | null
+          statsByDiscipline: Json | null
           timezone: string | null
           ttrating_dirt_oval: number | null
           ttrating_dirt_road: number | null
@@ -532,15 +560,36 @@ export type Database = {
           ttrating_rx: number | null
           updated_at: string
           username: string
+          xp_level: number | null
+          xp_points: number | null
+          xp_tier: string | null
         }
         Insert: {
+          achievements?: string | null
+          age?: number | null
+          availability_hours?: number | null
           avatar_url?: string | null
+          bio?: string | null
+          career_summary?: string | null
+          commitment_level?: string | null
+          cover_url?: string | null
           created_at?: string
+          dirt_oval_stats?: Json | null
+          dirt_road_stats?: Json | null
           disciplines?:
             | Database["public"]["Enums"]["driving_discipline"][]
             | null
-          driving_styles?: Database["public"]["Enums"]["driving_style"][] | null
+          display_name?: string | null
+          driving_styles?:
+            | Database["public"]["Enums"]["driving_style_enum"][]
+            | null
+          favorite_car_types?: string[] | null
+          favorite_disciplines?: string[] | null
+          formula_car_stats?: Json | null
+          full_name?: string | null
+          future_goals?: string | null
           id: string
+          iracing_stats?: Json | null
           irating_dirt_oval?: number | null
           irating_dirt_road?: number | null
           irating_oval?: number | null
@@ -551,15 +600,25 @@ export type Database = {
           licence_oval?: string | null
           licence_road?: string | null
           licence_rx?: string | null
+          looking_for_team?: boolean | null
           onboarding_complete?: boolean | null
+          oval_stats?: Json | null
+          platforms?: string[] | null
           preferred_roles?: Database["public"]["Enums"]["team_role"][] | null
+          region?: string | null
+          reputation?: number | null
+          road_stats?: Json | null
+          role_tags?: string[] | null
+          series_focus?: string[] | null
           sim_platforms?: Database["public"]["Enums"]["sim_platform"][] | null
           skill_level?: Database["public"]["Enums"]["skill_level"] | null
+          sports_car_stats?: Json | null
           sr_dirt_oval?: number | null
           sr_dirt_road?: number | null
           sr_oval?: number | null
           sr_road?: number | null
           sr_rx?: number | null
+          statsByDiscipline?: Json | null
           timezone?: string | null
           ttrating_dirt_oval?: number | null
           ttrating_dirt_road?: number | null
@@ -568,15 +627,36 @@ export type Database = {
           ttrating_rx?: number | null
           updated_at?: string
           username: string
+          xp_level?: number | null
+          xp_points?: number | null
+          xp_tier?: string | null
         }
         Update: {
+          achievements?: string | null
+          age?: number | null
+          availability_hours?: number | null
           avatar_url?: string | null
+          bio?: string | null
+          career_summary?: string | null
+          commitment_level?: string | null
+          cover_url?: string | null
           created_at?: string
+          dirt_oval_stats?: Json | null
+          dirt_road_stats?: Json | null
           disciplines?:
             | Database["public"]["Enums"]["driving_discipline"][]
             | null
-          driving_styles?: Database["public"]["Enums"]["driving_style"][] | null
+          display_name?: string | null
+          driving_styles?:
+            | Database["public"]["Enums"]["driving_style_enum"][]
+            | null
+          favorite_car_types?: string[] | null
+          favorite_disciplines?: string[] | null
+          formula_car_stats?: Json | null
+          full_name?: string | null
+          future_goals?: string | null
           id?: string
+          iracing_stats?: Json | null
           irating_dirt_oval?: number | null
           irating_dirt_road?: number | null
           irating_oval?: number | null
@@ -587,15 +667,25 @@ export type Database = {
           licence_oval?: string | null
           licence_road?: string | null
           licence_rx?: string | null
+          looking_for_team?: boolean | null
           onboarding_complete?: boolean | null
+          oval_stats?: Json | null
+          platforms?: string[] | null
           preferred_roles?: Database["public"]["Enums"]["team_role"][] | null
+          region?: string | null
+          reputation?: number | null
+          road_stats?: Json | null
+          role_tags?: string[] | null
+          series_focus?: string[] | null
           sim_platforms?: Database["public"]["Enums"]["sim_platform"][] | null
           skill_level?: Database["public"]["Enums"]["skill_level"] | null
+          sports_car_stats?: Json | null
           sr_dirt_oval?: number | null
           sr_dirt_road?: number | null
           sr_oval?: number | null
           sr_road?: number | null
           sr_rx?: number | null
+          statsByDiscipline?: Json | null
           timezone?: string | null
           ttrating_dirt_oval?: number | null
           ttrating_dirt_road?: number | null
@@ -604,8 +694,53 @@ export type Database = {
           ttrating_rx?: number | null
           updated_at?: string
           username?: string
+          xp_level?: number | null
+          xp_points?: number | null
+          xp_tier?: string | null
         }
         Relationships: []
+      }
+      racer_matches: {
+        Row: {
+          created_at: string | null
+          id: string
+          match_percentage: number | null
+          match_status: string
+          matched_profile_id: string | null
+          profile_id: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          match_percentage?: number | null
+          match_status?: string
+          matched_profile_id?: string | null
+          profile_id?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          match_percentage?: number | null
+          match_status?: string
+          matched_profile_id?: string | null
+          profile_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "racer_matches_matched_profile_id_fkey"
+            columns: ["matched_profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "racer_matches_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       reputation: {
         Row: {
@@ -1368,6 +1503,7 @@ export type Database = {
         | "Consistent"
         | "Quick"
         | "Methodical"
+      driving_style_enum: "strategic" | "clean" | "consistent"
       licence_class: "Rookie" | "D" | "C" | "B" | "A" | "Pro" | "Pro WC"
       sim_platform:
         | "iRacing"
@@ -1522,6 +1658,7 @@ export const Constants = {
         "Quick",
         "Methodical",
       ],
+      driving_style_enum: ["strategic", "clean", "consistent"],
       licence_class: ["Rookie", "D", "C", "B", "A", "Pro", "Pro WC"],
       sim_platform: [
         "iRacing",

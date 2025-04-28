@@ -13,9 +13,13 @@ interface RacerStats {
   sr: number | null;
   licence: LicenseClass | null;
   tt: number | null;
+  starts?: number;
+  wins?: number;
+  top5?: number;
+  avg_finish?: number;
 }
 
-interface Racer {
+export interface Racer {
   id: string;
   display_name: string;
   avatar_url: string;
@@ -31,6 +35,19 @@ interface Racer {
   reputation: number;
   preferred_roles: string[];
   looking_for_team: boolean;
+  // New fields
+  full_name?: string;
+  age?: number;
+  bio?: string;
+  career_summary?: string;
+  achievements?: string;
+  future_goals?: string;
+  favorite_disciplines?: string[];
+  favorite_car_types?: string[];
+  series_focus?: string[];
+  commitment_level?: string;
+  availability_hours?: number;
+  // Stats by discipline
   statsByDiscipline: {
     road: RacerStats;
     oval: RacerStats;
@@ -79,7 +96,7 @@ export const useRacerStore = create<RacerStore>((set, get) => ({
   filters: {},
   isLoading: false,
   error: null,
-  mockMode: false,
+  mockMode: true, // Set to true for now until we have real data
 
   fetchRacerById: async (id: string) => {
     try {
@@ -110,11 +127,21 @@ export const useRacerStore = create<RacerStore>((set, get) => ({
           xp_tier,
           reputation,
           looking_for_team,
-          irating_road, sr_road, licence_road, ttrating_road,
-          irating_oval, sr_oval, licence_oval, ttrating_oval,
-          irating_dirt_oval, sr_dirt_oval, licence_dirt_oval, ttrating_dirt_oval,
-          irating_dirt_road, sr_dirt_road, licence_dirt_road, ttrating_dirt_road,
-          irating_rx, sr_rx, licence_rx, ttrating_rx
+          full_name,
+          age,
+          bio,
+          career_summary,
+          achievements,
+          future_goals,
+          favorite_disciplines,
+          favorite_car_types,
+          series_focus,
+          commitment_level,
+          availability_hours,
+          road_stats,
+          oval_stats,
+          dirt_oval_stats,
+          dirt_road_stats
         `)
         .eq('id', id)
         .single();
@@ -125,39 +152,7 @@ export const useRacerStore = create<RacerStore>((set, get) => ({
         return;
       }
 
-      const mappedStatsByDiscipline = {
-        road: {
-          irating: data.irating_road,
-          sr: data.sr_road,
-          licence: data.licence_road as LicenseClass | null,
-          tt: data.ttrating_road,
-        },
-        oval: {
-          irating: data.irating_oval,
-          sr: data.sr_oval,
-          licence: data.licence_oval as LicenseClass | null,
-          tt: data.ttrating_oval,
-        },
-        dirt_oval: {
-          irating: data.irating_dirt_oval,
-          sr: data.sr_dirt_oval,
-          licence: data.licence_dirt_oval as LicenseClass | null,
-          tt: data.ttrating_dirt_oval,
-        },
-        dirt_road: {
-          irating: data.irating_dirt_road,
-          sr: data.sr_dirt_road,
-          licence: data.licence_dirt_road as LicenseClass | null,
-          tt: data.ttrating_dirt_road,
-        },
-        rx: {
-          irating: data.irating_rx,
-          sr: data.sr_rx,
-          licence: data.licence_rx as LicenseClass | null,
-          tt: data.ttrating_rx,
-        },
-      };
-
+      // Map the DB structure to our frontend structure
       const mappedRacer: Racer = {
         id: data.id,
         display_name: data.display_name || 'Unknown Racer',
@@ -170,9 +165,28 @@ export const useRacerStore = create<RacerStore>((set, get) => ({
         xp_level: data.xp_level || 1,
         xp_points: data.xp_points || 0,
         xp_tier: (data.xp_tier || 'bronze') as XpTier,
+        sim_platforms: data.platforms || [],
         reputation: data.reputation || 0,
+        preferred_roles: data.role_tags || [],
         looking_for_team: data.looking_for_team || false,
-        statsByDiscipline: mappedStatsByDiscipline,
+        full_name: data.full_name,
+        age: data.age,
+        bio: data.bio,
+        career_summary: data.career_summary,
+        achievements: data.achievements,
+        future_goals: data.future_goals,
+        favorite_disciplines: data.favorite_disciplines,
+        favorite_car_types: data.favorite_car_types,
+        series_focus: data.series_focus,
+        commitment_level: data.commitment_level,
+        availability_hours: data.availability_hours,
+        statsByDiscipline: {
+          road: data.road_stats || { irating: null, sr: null, licence: null, tt: null },
+          oval: data.oval_stats || { irating: null, sr: null, licence: null, tt: null },
+          dirt_oval: data.dirt_oval_stats || { irating: null, sr: null, licence: null, tt: null },
+          dirt_road: data.dirt_road_stats || { irating: null, sr: null, licence: null, tt: null },
+          rx: { irating: null, sr: null, licence: null, tt: null } // RX stats not yet in DB
+        }
       };
 
       set({ currentRacer: mappedRacer, isLoading: false });
@@ -211,52 +225,8 @@ export const useRacerStore = create<RacerStore>((set, get) => ({
         return;
       }
 
-      const { data, error } = await supabase
-        .from('profiles')
-        .select(`
-          id, 
-          username as display_name,
-          avatar_url,
-          region,
-          timezone,
-          sim_platforms as platforms,
-          driving_styles,
-          preferred_roles as role_tags,
-          reputation,
-          looking_for_team
-        `)
-        .limit(5);
-
-      if (error) {
-        console.error('Failed to fetch recommended racers:', error.message);
-        set({ error: error.message, isLoading: false });
-        return;
-      }
-
-      const recommendedRacers = data.map(racer => ({
-        id: racer.id,
-        display_name: racer.display_name || 'Unknown Racer',
-        avatar_url: racer.avatar_url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default',
-        region: racer.region || 'Unknown',
-        timezone: racer.timezone || 'UTC',
-        platforms: racer.platforms || [],
-        driving_styles: racer.driving_styles || [],
-        role_tags: (racer.role_tags || []) as RoleTag[],
-        xp_level: 0,
-        xp_points: 0,
-        xp_tier: 'bronze' as XpTier,
-        reputation: racer.reputation || 0,
-        looking_for_team: racer.looking_for_team || false,
-        statsByDiscipline: {
-          road: { irating: null, sr: null, licence: null, tt: null },
-          oval: { irating: null, sr: null, licence: null, tt: null },
-          dirt_oval: { irating: null, sr: null, licence: null, tt: null },
-          dirt_road: { irating: null, sr: null, licence: null, tt: null },
-          rx: { irating: null, sr: null, licence: null, tt: null },
-        }
-      }));
-
-      set({ recommendedRacers, isLoading: false });
+      // For a real implementation, we would fetch data from Supabase here
+      set({ recommendedRacers: MOCK_RACERS.slice(0, 3), isLoading: false });
     } catch (error) {
       console.error('Unexpected error in fetchRecommendedRacers:', error);
       set({ error: 'An unexpected error occurred', isLoading: false });
@@ -273,55 +243,8 @@ export const useRacerStore = create<RacerStore>((set, get) => ({
         return;
       }
 
-      const { data, error } = await supabase
-        .from('profiles')
-        .select(`
-          id, 
-          username as display_name,
-          avatar_url,
-          region,
-          timezone,
-          sim_platforms as platforms,
-          driving_styles,
-          preferred_roles as role_tags,
-          xp_level,
-          xp_points,
-          xp_tier,
-          reputation,
-          looking_for_team,
-          irating_road
-        `);
-
-      if (error) {
-        console.error('Failed to fetch all racers:', error.message);
-        set({ error: error.message, isLoading: false });
-        return;
-      }
-
-      const allRacers = data.map(racer => ({
-        id: racer.id,
-        display_name: racer.display_name || 'Unknown Racer',
-        avatar_url: racer.avatar_url || 'https://api.dicebear.com/7.x/avataaars/svg?seed=default',
-        region: racer.region || 'Unknown',
-        timezone: racer.timezone || 'UTC',
-        platforms: racer.platforms || [],
-        driving_styles: racer.driving_styles || [],
-        role_tags: (racer.role_tags || []) as RoleTag[],
-        xp_level: racer.xp_level || 1,
-        xp_points: racer.xp_points || 0,
-        xp_tier: (racer.xp_tier || 'bronze') as XpTier,
-        reputation: racer.reputation || 0,
-        looking_for_team: racer.looking_for_team || false,
-        statsByDiscipline: {
-          road: { irating: racer.irating_road, sr: null, licence: null, tt: null },
-          oval: { irating: null, sr: null, licence: null, tt: null },
-          dirt_oval: { irating: null, sr: null, licence: null, tt: null },
-          dirt_road: { irating: null, sr: null, licence: null, tt: null },
-          rx: { irating: null, sr: null, licence: null, tt: null },
-        }
-      }));
-
-      set({ allRacers, filteredRacers: allRacers, isLoading: false });
+      // For a real implementation, we would fetch data from Supabase here
+      set({ allRacers: MOCK_RACERS, filteredRacers: MOCK_RACERS, isLoading: false });
     } catch (error) {
       console.error('Unexpected error in fetchAllRacers:', error);
       set({ error: 'An unexpected error occurred', isLoading: false });
@@ -475,14 +398,27 @@ const MOCK_RACERS: Racer[] = [
     xp_level: 24,
     xp_points: 2345,
     xp_tier: 'gold',
+    sim_platforms: ['iRacing', 'ACC'],
     reputation: 87,
+    preferred_roles: ['Driver'],
     looking_for_team: true,
+    full_name: 'Michael Johnson',
+    age: 28,
+    bio: 'Passionate racer with 5+ years of competitive sim racing experience',
+    career_summary: 'Started racing in 2018, competed in multiple endurance events',
+    achievements: '2nd place in 24h of Spa 2022, GT3 championship runner-up',
+    future_goals: 'Win a major endurance event, join a professional sim racing team',
+    favorite_disciplines: ['GT3', 'Endurance'],
+    favorite_car_types: ['Ferrari 488 GT3', 'Porsche 911 RSR'],
+    series_focus: ['VRS GT World Championship', 'Special Events'],
+    commitment_level: 'High',
+    availability_hours: 20,
     statsByDiscipline: {
-      road: { irating: 2345, sr: 3.75, licence: 'A', tt: 1800 },
-      oval: { irating: 1900, sr: 2.9, licence: 'C', tt: 1100 },
-      dirt_oval: { irating: 0, sr: 0, licence: 'rookie', tt: 0 },
-      dirt_road: { irating: 0, sr: 0, licence: 'rookie', tt: 0 },
-      rx: { irating: 0, sr: 0, licence: 'rookie', tt: 0 },
+      road: { irating: 2345, sr: 3.75, licence: 'A', tt: 1800, starts: 156, wins: 12, top5: 45, avg_finish: 5.6 },
+      oval: { irating: 1900, sr: 2.9, licence: 'C', tt: 1100, starts: 35, wins: 2, top5: 8, avg_finish: 10.3 },
+      dirt_oval: { irating: 0, sr: 0, licence: 'rookie', tt: 0, starts: 0, wins: 0, top5: 0, avg_finish: 0 },
+      dirt_road: { irating: 0, sr: 0, licence: 'rookie', tt: 0, starts: 0, wins: 0, top5: 0, avg_finish: 0 },
+      rx: { irating: 0, sr: 0, licence: 'rookie', tt: 0, starts: 0, wins: 0, top5: 0, avg_finish: 0 },
     },
   },
   {
@@ -497,14 +433,27 @@ const MOCK_RACERS: Racer[] = [
     xp_level: 18,
     xp_points: 1800,
     xp_tier: 'silver',
+    sim_platforms: ['F1', 'GT7'],
     reputation: 92,
+    preferred_roles: ['Driver'],
     looking_for_team: false,
+    full_name: 'Lars Petersen',
+    age: 24,
+    bio: 'Formula racing specialist with focus on sprint events',
+    career_summary: 'European competition specialist since 2020',
+    achievements: 'F1 league champion 2023, Multiple podiums in sprint series',
+    future_goals: 'Enter Formula E esports competition',
+    favorite_disciplines: ['F1', 'Open Wheel'],
+    favorite_car_types: ['F1', 'Indycar'],
+    series_focus: ['F1 Grand Prix Series', 'GT Sprint Series'],
+    commitment_level: 'Medium',
+    availability_hours: 15,
     statsByDiscipline: {
-      road: { irating: 3100, sr: 4.2, licence: 'A', tt: 2200 },
-      oval: { irating: 1200, sr: 2.1, licence: 'D', tt: 900 },
-      dirt_oval: { irating: 0, sr: 0, licence: 'rookie', tt: 0 },
-      dirt_road: { irating: 2400, sr: 3.5, licence: 'B', tt: 1950 },
-      rx: { irating: 0, sr: 0, licence: 'rookie', tt: 0 },
+      road: { irating: 3100, sr: 4.2, licence: 'A', tt: 2200, starts: 203, wins: 31, top5: 89, avg_finish: 4.2 },
+      oval: { irating: 1200, sr: 2.1, licence: 'D', tt: 900, starts: 17, wins: 0, top5: 3, avg_finish: 12.7 },
+      dirt_oval: { irating: 0, sr: 0, licence: 'rookie', tt: 0, starts: 0, wins: 0, top5: 0, avg_finish: 0 },
+      dirt_road: { irating: 2400, sr: 3.5, licence: 'B', tt: 1950, starts: 42, wins: 5, top5: 18, avg_finish: 6.3 },
+      rx: { irating: 0, sr: 0, licence: 'rookie', tt: 0, starts: 0, wins: 0, top5: 0, avg_finish: 0 },
     },
   },
   {
@@ -519,14 +468,27 @@ const MOCK_RACERS: Racer[] = [
     xp_level: 31,
     xp_points: 3150,
     xp_tier: 'platinum',
+    sim_platforms: ['rFactor', 'Automobilista'],
     reputation: 95,
+    preferred_roles: ['Driver', 'Team Manager'],
     looking_for_team: true,
+    full_name: 'Jack Williams',
+    age: 32,
+    bio: 'Rally and off-road specialist with team management experience',
+    career_summary: 'Started in circuit racing, moved to rally in 2019',
+    achievements: 'Rally championship wins, Dirt Rally 2.0 tournament finalist',
+    future_goals: 'Build a competitive rally team, mentor new drivers',
+    favorite_disciplines: ['Rally', 'RallyCross', 'Off-road'],
+    favorite_car_types: ['WRC', 'Rally Cross'],
+    series_focus: ['Dirt Rally Championship', 'Off-road Events'],
+    commitment_level: 'High',
+    availability_hours: 25,
     statsByDiscipline: {
-      road: { irating: 1800, sr: 3.0, licence: 'B', tt: 1650 },
-      oval: { irating: 0, sr: 0, licence: 'rookie', tt: 0 },
-      dirt_oval: { irating: 2700, sr: 4.5, licence: 'A', tt: 2500 },
-      dirt_road: { irating: 3500, sr: 4.99, licence: 'A', tt: 3200 },
-      rx: { irating: 2900, sr: 4.2, licence: 'A', tt: 2600 },
+      road: { irating: 1800, sr: 3.0, licence: 'B', tt: 1650, starts: 87, wins: 4, top5: 21, avg_finish: 8.2 },
+      oval: { irating: 0, sr: 0, licence: 'rookie', tt: 0, starts: 0, wins: 0, top5: 0, avg_finish: 0 },
+      dirt_oval: { irating: 2700, sr: 4.5, licence: 'A', tt: 2500, starts: 124, wins: 22, top5: 67, avg_finish: 5.4 },
+      dirt_road: { irating: 3500, sr: 4.99, licence: 'A', tt: 3200, starts: 218, wins: 47, top5: 112, avg_finish: 3.8 },
+      rx: { irating: 2900, sr: 4.2, licence: 'A', tt: 2600, starts: 87, wins: 14, top5: 43, avg_finish: 4.7 },
     },
   }
 ];

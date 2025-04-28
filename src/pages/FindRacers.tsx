@@ -7,7 +7,7 @@ import { Search, Filter, X } from 'lucide-react';
 import AppLayout from '@/components/layout/AppLayout';
 
 const FindRacers: React.FC = () => {
-  const { racers, fetchRacers } = useRacerStore();
+  const { allRacers, fetchAllRacers, filteredRacers, applyFilters, setFilter, resetFilters, isLoading } = useRacerStore();
   const [filters, setFilters] = useState({
     platform: '' as Platform | '',
     drivingStyle: '',
@@ -21,8 +21,8 @@ const FindRacers: React.FC = () => {
   const [showFilters, setShowFilters] = useState(false);
   
   useEffect(() => {
-    fetchRacers();
-  }, [fetchRacers]);
+    fetchAllRacers();
+  }, [fetchAllRacers]);
   
   const toggleFilters = () => {
     setShowFilters(!showFilters);
@@ -38,41 +38,41 @@ const FindRacers: React.FC = () => {
     });
   };
   
-  const applyFilters = () => {
+  const handleApplyFilters = () => {
     // Prepare filter object based on set filters
-    const filterObj: any = {};
-    
     if (filters.platform) {
-      filterObj.platforms = [filters.platform];
+      setFilter({ platforms: [filters.platform] });
     }
     
     if (filters.drivingStyle) {
-      filterObj.driving_styles = [filters.drivingStyle];
+      setFilter({ drivingStyles: [filters.drivingStyle] });
     }
     
     if (filters.region) {
-      filterObj.region = filters.region;
+      setFilter({ region: filters.region });
     }
     
     if (filters.licenseClass) {
-      filterObj['iracing_stats.license_class'] = filters.licenseClass;
+      // In a real app, we would map this to the correct discipline
     }
     
     if (filters.iRatingMin && filters.iRatingMax) {
-      filterObj['iracing_stats.irating'] = [
-        parseInt(filters.iRatingMin), 
-        parseInt(filters.iRatingMax)
-      ];
+      setFilter({ 
+        iRatingRange: [
+          parseInt(filters.iRatingMin), 
+          parseInt(filters.iRatingMax)
+        ]
+      });
     }
     
     if (filters.lookingForTeam) {
-      filterObj.looking_for_team = true;
+      setFilter({ lookingForTeam: true });
     }
     
-    fetchRacers(filterObj);
+    applyFilters();
   };
   
-  const clearFilters = () => {
+  const handleClearFilters = () => {
     setFilters({
       platform: '',
       drivingStyle: '',
@@ -82,13 +82,15 @@ const FindRacers: React.FC = () => {
       iRatingMax: '',
       lookingForTeam: false
     });
-    fetchRacers();
+    resetFilters();
   };
   
   const platforms: Platform[] = ['iRacing', 'F1', 'ACC', 'GT7', 'rFactor', 'Automobilista', 'RaceRoom'];
   const drivingStyles = ['Endurance', 'Sprint', 'Oval', 'Rally', 'Drift', 'F1', 'GT3', 'GT4', 'NASCAR', 'Dirt'];
   const regions = ['North America', 'Europe', 'Asia', 'South America', 'Oceania', 'Global'];
   const licenseClasses: LicenseClass[] = ['rookie', 'D', 'C', 'B', 'A', 'pro', 'black'];
+
+  const displayRacers = filteredRacers || allRacers || [];
 
   return (
     <AppLayout>
@@ -222,29 +224,47 @@ const FindRacers: React.FC = () => {
             <div className="mt-4 flex justify-end space-x-2">
               <Button 
                 variant="outline" 
-                onClick={clearFilters} 
+                onClick={handleClearFilters} 
                 className="flex items-center"
               >
                 <X size={16} className="mr-1" />
                 Clear
               </Button>
-              <Button onClick={applyFilters} className="racing-btn">Apply Filters</Button>
+              <Button onClick={handleApplyFilters} className="racing-btn">Apply Filters</Button>
             </div>
           </div>
         )}
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {racers.map(racer => (
-            <RacerCard key={racer.id} racer={racer} />
-          ))}
-          
-          {racers.length === 0 && (
-            <div className="col-span-1 md:col-span-2 lg:col-span-3 text-center py-12">
-              <p className="text-gray-400">No racers found matching your filters.</p>
-              <Button variant="outline" onClick={clearFilters} className="mt-4">
-                Clear Filters
-              </Button>
-            </div>
+          {isLoading ? (
+            Array(6).fill(0).map((_, i) => (
+              <div key={i} className="racing-card p-4 animate-pulse">
+                <div className="flex items-start">
+                  <div className="h-16 w-16 mr-3 bg-gray-800 rounded-full"></div>
+                  <div className="flex-grow">
+                    <div className="h-5 bg-gray-800 rounded w-1/2 mb-2"></div>
+                    <div className="h-3 bg-gray-800 rounded w-1/4 mb-2"></div>
+                    <div className="h-2 bg-gray-800 rounded w-full mb-2"></div>
+                    <div className="h-4 bg-gray-800 rounded w-3/4"></div>
+                  </div>
+                </div>
+                <div className="mt-4 flex justify-between">
+                  <div className="h-8 w-20 bg-gray-800 rounded"></div>
+                  <div className="h-8 w-20 bg-gray-800 rounded"></div>
+                </div>
+              </div>
+            ))
+          ) : (
+            displayRacers.length > 0 ? displayRacers.map(racer => (
+              <RacerCard key={racer.id} racer={racer} />
+            )) : (
+              <div className="col-span-1 md:col-span-2 lg:col-span-3 text-center py-12">
+                <p className="text-gray-400">No racers found matching your filters.</p>
+                <Button variant="outline" onClick={handleClearFilters} className="mt-4">
+                  Clear Filters
+                </Button>
+              </div>
+            )
           )}
         </div>
       </div>

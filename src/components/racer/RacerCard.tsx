@@ -2,7 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { RacerProfile } from '@/stores/useRacerStore';
+import { Racer } from '@/stores/useRacerStore';
 import LicenseClassBadge from './LicenseClassBadge';
 import XpProgressBar from './XpProgressBar';
 import PlatformBadge from './PlatformBadge';
@@ -11,7 +11,7 @@ import { UserPlus, Users, Eye } from 'lucide-react';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 
 interface RacerCardProps {
-  racer: RacerProfile;
+  racer: Racer;
 }
 
 const RacerCard: React.FC<RacerCardProps> = ({ racer }) => {
@@ -27,7 +27,7 @@ const RacerCard: React.FC<RacerCardProps> = ({ racer }) => {
           <div className="flex justify-between items-start">
             <h3 className="font-rajdhani font-bold text-lg">{racer.display_name}</h3>
             <div className="flex space-x-1">
-              <LicenseClassBadge licenseClass={racer.iracing_stats.license_class} size="sm" />
+              <LicenseClassBadge licenseClass={racer.statsByDiscipline.road.licence} size="sm" />
             </div>
           </div>
           
@@ -39,7 +39,7 @@ const RacerCard: React.FC<RacerCardProps> = ({ racer }) => {
           
           <div className="mt-2">
             <span className="text-sm text-gray-300">
-              {racer.xp_tier.charAt(0).toUpperCase() + racer.xp_tier.slice(1)} – {racer.iracing_stats.irating} iR
+              {racer.xp_tier.charAt(0).toUpperCase() + racer.xp_tier.slice(1)} – {racer.statsByDiscipline.road.irating || 0} iR
             </span>
           </div>
           

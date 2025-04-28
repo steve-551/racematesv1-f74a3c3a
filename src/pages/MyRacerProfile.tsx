@@ -1,5 +1,6 @@
+
 import React, { useEffect, useState } from 'react';
-import { useRacerStore, Platform, RoleTag as RoleTagType, LicenseClass } from '@/stores/useRacerStore';
+import { useRacerStore } from '@/stores/useRacerStore';
 import AppLayout from '@/components/layout/AppLayout';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -14,21 +15,29 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import RoleTag from '@/components/racer/RoleTag';
+import { Textarea } from '@/components/ui/textarea';
+import { useProfile } from '@/components/providers/ProfileProvider';
 
 const MyRacerProfile: React.FC = () => {
-  const { currentRacer, fetchCurrentRacerProfile, updateRacerProfile, toggleLookingForTeam } = useRacerStore();
+  const { currentRacer, fetchCurrentRacerProfile, updateRacerProfile, toggleLookingForTeam, isLoading } = useRacerStore();
+  const { isProfileLoading, userTeams } = useProfile();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     display_name: '',
-    iracing_stats: {
-      irating: 0,
-      safety_rating: 0,
-      license_class: 'D' as LicenseClass,
-      tt_rating: 0
-    },
-    platforms: [] as Platform[],
+    full_name: '',
+    age: 0,
+    bio: '',
+    career_summary: '',
+    achievements: '',
+    future_goals: '',
+    favorite_disciplines: [] as string[],
+    favorite_car_types: [] as string[],
+    series_focus: [] as string[],
+    commitment_level: '',
+    availability_hours: 0,
+    platforms: [] as string[],
     driving_styles: [] as string[],
-    role_tags: [] as RoleTagType[],
+    role_tags: [] as string[],
     region: '',
     timezone: '',
     looking_for_team: false
@@ -42,7 +51,17 @@ const MyRacerProfile: React.FC = () => {
     if (currentRacer) {
       setFormData({
         display_name: currentRacer.display_name,
-        iracing_stats: { ...currentRacer.iracing_stats },
+        full_name: currentRacer.full_name || '',
+        age: currentRacer.age || 0,
+        bio: currentRacer.bio || '',
+        career_summary: currentRacer.career_summary || '',
+        achievements: currentRacer.achievements || '',
+        future_goals: currentRacer.future_goals || '',
+        favorite_disciplines: currentRacer.favorite_disciplines || [],
+        favorite_car_types: currentRacer.favorite_car_types || [],
+        series_focus: currentRacer.series_focus || [],
+        commitment_level: currentRacer.commitment_level || '',
+        availability_hours: currentRacer.availability_hours || 0,
         platforms: [...currentRacer.platforms],
         driving_styles: [...currentRacer.driving_styles],
         role_tags: [...currentRacer.role_tags],
@@ -59,7 +78,17 @@ const MyRacerProfile: React.FC = () => {
     if (isEditing && currentRacer) {
       setFormData({
         display_name: currentRacer.display_name,
-        iracing_stats: { ...currentRacer.iracing_stats },
+        full_name: currentRacer.full_name || '',
+        age: currentRacer.age || 0,
+        bio: currentRacer.bio || '',
+        career_summary: currentRacer.career_summary || '',
+        achievements: currentRacer.achievements || '',
+        future_goals: currentRacer.future_goals || '',
+        favorite_disciplines: currentRacer.favorite_disciplines || [],
+        favorite_car_types: currentRacer.favorite_car_types || [],
+        series_focus: currentRacer.series_focus || [],
+        commitment_level: currentRacer.commitment_level || '',
+        availability_hours: currentRacer.availability_hours || 0,
         platforms: [...currentRacer.platforms],
         driving_styles: [...currentRacer.driving_styles],
         role_tags: [...currentRacer.role_tags],
@@ -70,17 +99,13 @@ const MyRacerProfile: React.FC = () => {
     }
   };
   
-  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target;
     
-    if (name.includes('.')) {
-      const [parent, child] = name.split('.');
+    if (type === 'number') {
       setFormData(prev => ({
         ...prev,
-        [parent]: {
-          ...prev[parent as keyof typeof prev] as object,
-          [child]: value
-        }
+        [name]: parseInt(value)
       }));
     } else {
       setFormData(prev => ({
@@ -90,22 +115,13 @@ const MyRacerProfile: React.FC = () => {
     }
   };
   
-  const handleCheckboxChange = (name: 'platforms' | 'driving_styles', value: string, checked: boolean) => {
+  const handleCheckboxChange = (name: 'platforms' | 'driving_styles' | 'favorite_disciplines' | 'favorite_car_types' | 'series_focus', value: string, checked: boolean) => {
     setFormData(prev => {
-      if (name === 'platforms') {
-        const currentValues = prev.platforms;
-        if (checked) {
-          return { ...prev, platforms: [...currentValues, value as Platform] };
-        } else {
-          return { ...prev, platforms: currentValues.filter(v => v !== value) };
-        }
+      const currentValues = prev[name];
+      if (checked) {
+        return { ...prev, [name]: [...currentValues, value] };
       } else {
-        const currentValues = prev.driving_styles;
-        if (checked) {
-          return { ...prev, driving_styles: [...currentValues, value] };
-        } else {
-          return { ...prev, driving_styles: currentValues.filter(v => v !== value) };
-        }
+        return { ...prev, [name]: currentValues.filter(v => v !== value) };
       }
     });
   };
@@ -136,11 +152,21 @@ const MyRacerProfile: React.FC = () => {
     }
   };
   
-  if (!currentRacer) {
+  if (isProfileLoading || isLoading) {
     return (
       <AppLayout>
         <div className="container mx-auto px-4 py-16 text-center">
           <p className="text-lg">Loading profile...</p>
+        </div>
+      </AppLayout>
+    );
+  }
+  
+  if (!currentRacer) {
+    return (
+      <AppLayout>
+        <div className="container mx-auto px-4 py-16 text-center">
+          <p className="text-lg">No profile found. Please sign in or create an account.</p>
         </div>
       </AppLayout>
     );
@@ -173,6 +199,7 @@ const MyRacerProfile: React.FC = () => {
           <TabsList className="bg-racing-dark-alt mb-6">
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="stats">Racing Stats</TabsTrigger>
+            <TabsTrigger value="teams">Teams</TabsTrigger>
             <TabsTrigger value="xp">XP & Achievements</TabsTrigger>
           </TabsList>
           
@@ -212,14 +239,51 @@ const MyRacerProfile: React.FC = () => {
                     
                     <div className="mt-4">
                       {isEditing ? (
-                        <Input
-                          name="display_name"
-                          value={formData.display_name}
-                          onChange={handleInputChange}
-                          className="bg-gray-800 border-gray-700 mb-2"
-                        />
+                        <>
+                          <div className="mb-4">
+                            <Label htmlFor="display_name">Display Name</Label>
+                            <Input
+                              id="display_name"
+                              name="display_name"
+                              value={formData.display_name}
+                              onChange={handleInputChange}
+                              className="bg-gray-800 border-gray-700"
+                            />
+                          </div>
+                          
+                          <div className="mb-4">
+                            <Label htmlFor="full_name">Full Name</Label>
+                            <Input
+                              id="full_name"
+                              name="full_name"
+                              value={formData.full_name}
+                              onChange={handleInputChange}
+                              className="bg-gray-800 border-gray-700"
+                            />
+                          </div>
+                          
+                          <div className="mb-4">
+                            <Label htmlFor="age">Age</Label>
+                            <Input
+                              id="age"
+                              name="age"
+                              type="number"
+                              value={formData.age}
+                              onChange={handleInputChange}
+                              className="bg-gray-800 border-gray-700"
+                            />
+                          </div>
+                        </>
                       ) : (
-                        <h1 className="text-2xl font-orbitron font-bold">{currentRacer.display_name}</h1>
+                        <>
+                          <h1 className="text-2xl font-orbitron font-bold">{currentRacer.display_name}</h1>
+                          {currentRacer.full_name && (
+                            <p className="text-gray-400">{currentRacer.full_name}</p>
+                          )}
+                          {currentRacer.age && (
+                            <p className="text-gray-400">Age: {currentRacer.age}</p>
+                          )}
+                        </>
                       )}
                       
                       <div className="mt-2">
@@ -287,7 +351,7 @@ const MyRacerProfile: React.FC = () => {
                               <label key={platform} className="flex items-center space-x-2">
                                 <input
                                   type="checkbox"
-                                  checked={formData.platforms.includes(platform as Platform)}
+                                  checked={formData.platforms.includes(platform)}
                                   onChange={(e) => handleCheckboxChange('platforms', platform, e.target.checked)}
                                   className="h-4 w-4"
                                 />
@@ -333,44 +397,248 @@ const MyRacerProfile: React.FC = () => {
               <div className="lg:col-span-2">
                 <Card className="racing-card mb-6">
                   <CardHeader className="pb-2">
-                    <CardTitle className="font-rajdhani">Driving Styles & Preferences</CardTitle>
+                    <CardTitle className="font-rajdhani">Bio & Career</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="space-y-4">
                     {isEditing ? (
-                      <div>
-                        <label className="block text-sm font-medium text-gray-300 mb-2">Select Your Driving Styles</label>
-                        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                          {['Endurance', 'Sprint', 'Oval', 'Rally', 'Drift', 'F1', 'GT3', 'GT4', 'NASCAR', 'Dirt'].map(style => (
-                            <label key={style} className="flex items-center space-x-2">
-                              <input
-                                type="checkbox"
-                                checked={formData.driving_styles.includes(style)}
-                                onChange={(e) => handleCheckboxChange('driving_styles', style, e.target.checked)}
-                                className="h-4 w-4"
-                              />
-                              <span>{style}</span>
-                            </label>
-                          ))}
+                      <>
+                        <div>
+                          <Label htmlFor="bio">Bio</Label>
+                          <Textarea
+                            id="bio"
+                            name="bio"
+                            value={formData.bio}
+                            onChange={handleInputChange}
+                            className="bg-gray-800 border-gray-700 min-h-[100px]"
+                            placeholder="Tell us about yourself as a racer..."
+                          />
                         </div>
-                      </div>
+                      
+                        <div>
+                          <Label htmlFor="career_summary">Career Summary</Label>
+                          <Textarea
+                            id="career_summary"
+                            name="career_summary"
+                            value={formData.career_summary}
+                            onChange={handleInputChange}
+                            className="bg-gray-800 border-gray-700"
+                            placeholder="Summarize your racing career..."
+                          />
+                        </div>
+                      
+                        <div>
+                          <Label htmlFor="achievements">Achievements</Label>
+                          <Textarea
+                            id="achievements"
+                            name="achievements"
+                            value={formData.achievements}
+                            onChange={handleInputChange}
+                            className="bg-gray-800 border-gray-700"
+                            placeholder="List your racing achievements..."
+                          />
+                        </div>
+                      
+                        <div>
+                          <Label htmlFor="future_goals">Future Goals</Label>
+                          <Textarea
+                            id="future_goals"
+                            name="future_goals"
+                            value={formData.future_goals}
+                            onChange={handleInputChange}
+                            className="bg-gray-800 border-gray-700"
+                            placeholder="What are your racing ambitions?"
+                          />
+                        </div>
+                      </>
                     ) : (
-                      <div className="flex flex-wrap gap-2">
-                        {currentRacer.driving_styles.map((style, i) => (
-                          <span 
-                            key={i} 
-                            className="px-3 py-1 bg-gray-800 text-white rounded-md text-sm"
-                          >
-                            {style}
-                          </span>
-                        ))}
-                      </div>
+                      <>
+                        {currentRacer.bio ? (
+                          <div>
+                            <h3 className="text-md font-semibold">About Me</h3>
+                            <p className="text-gray-300">{currentRacer.bio}</p>
+                          </div>
+                        ) : (
+                          <p className="text-gray-400 italic">No bio information added yet.</p>
+                        )}
+                        
+                        {currentRacer.career_summary && (
+                          <div>
+                            <h3 className="text-md font-semibold">Career Summary</h3>
+                            <p className="text-gray-300">{currentRacer.career_summary}</p>
+                          </div>
+                        )}
+                        
+                        {currentRacer.achievements && (
+                          <div>
+                            <h3 className="text-md font-semibold">Achievements</h3>
+                            <p className="text-gray-300">{currentRacer.achievements}</p>
+                          </div>
+                        )}
+                        
+                        {currentRacer.future_goals && (
+                          <div>
+                            <h3 className="text-md font-semibold">Future Goals</h3>
+                            <p className="text-gray-300">{currentRacer.future_goals}</p>
+                          </div>
+                        )}
+                      </>
                     )}
                   </CardContent>
                 </Card>
                 
                 <Card className="racing-card mb-6">
                   <CardHeader className="pb-2">
-                    <CardTitle className="font-rajdhani">Role Tags</CardTitle>
+                    <CardTitle className="font-rajdhani">Preferences & Specialties</CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    {isEditing ? (
+                      <>
+                        <div>
+                          <Label className="mb-2 block">Favorite Disciplines</Label>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            {['GT3', 'GT4', 'GTE', 'LMP', 'F1', 'Oval', 'Dirt', 'Rally', 'Drift', 'Prototypes'].map(discipline => (
+                              <label key={discipline} className="flex items-center space-x-2">
+                                <input
+                                  type="checkbox"
+                                  checked={formData.favorite_disciplines.includes(discipline)}
+                                  onChange={(e) => handleCheckboxChange('favorite_disciplines', discipline, e.target.checked)}
+                                  className="h-4 w-4"
+                                />
+                                <span>{discipline}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <Label className="mb-2 block">Favorite Car Types</Label>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            {['Ferrari 488 GT3', 'Porsche 911 RSR', 'BMW M4 GT3', 'Audi R8 LMS', 'Mercedes AMG GT3', 'Formula 1', 'NASCAR', 'Rally Car', 'Drift Car', 'Prototype'].map(car => (
+                              <label key={car} className="flex items-center space-x-2">
+                                <input
+                                  type="checkbox"
+                                  checked={formData.favorite_car_types.includes(car)}
+                                  onChange={(e) => handleCheckboxChange('favorite_car_types', car, e.target.checked)}
+                                  className="h-4 w-4"
+                                />
+                                <span>{car}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <Label className="mb-2 block">Series Focus</Label>
+                          <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+                            {['Sprint Races', 'Endurance Events', 'Championships', 'Special Events', 'Time Trials', 'League Racing'].map(series => (
+                              <label key={series} className="flex items-center space-x-2">
+                                <input
+                                  type="checkbox"
+                                  checked={formData.series_focus.includes(series)}
+                                  onChange={(e) => handleCheckboxChange('series_focus', series, e.target.checked)}
+                                  className="h-4 w-4"
+                                />
+                                <span>{series}</span>
+                              </label>
+                            ))}
+                          </div>
+                        </div>
+                        
+                        <div>
+                          <Label htmlFor="commitment_level">Commitment Level</Label>
+                          <select
+                            id="commitment_level"
+                            name="commitment_level"
+                            value={formData.commitment_level}
+                            onChange={handleInputChange}
+                            className="w-full bg-gray-800 text-white border border-gray-700 rounded-md px-3 py-2"
+                          >
+                            <option value="">Select Commitment Level</option>
+                            <option value="Casual">Casual</option>
+                            <option value="Regular">Regular</option>
+                            <option value="Competitive">Competitive</option>
+                            <option value="Professional">Professional</option>
+                          </select>
+                        </div>
+                        
+                        <div>
+                          <Label htmlFor="availability_hours">Weekly Availability (Hours)</Label>
+                          <Input
+                            id="availability_hours"
+                            name="availability_hours"
+                            type="number"
+                            value={formData.availability_hours}
+                            onChange={handleInputChange}
+                            className="bg-gray-800 border-gray-700"
+                          />
+                        </div>
+                      </>
+                    ) : (
+                      <div className="space-y-4">
+                        <div>
+                          <h3 className="text-md font-semibold">Favorite Disciplines</h3>
+                          {currentRacer.favorite_disciplines && currentRacer.favorite_disciplines.length > 0 ? (
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              {currentRacer.favorite_disciplines.map((discipline, idx) => (
+                                <span key={idx} className="px-3 py-1 bg-gray-800 text-white rounded-md text-sm">
+                                  {discipline}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-gray-400 italic">No favorite disciplines specified.</p>
+                          )}
+                        </div>
+                        
+                        <div>
+                          <h3 className="text-md font-semibold">Favorite Cars</h3>
+                          {currentRacer.favorite_car_types && currentRacer.favorite_car_types.length > 0 ? (
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              {currentRacer.favorite_car_types.map((car, idx) => (
+                                <span key={idx} className="px-3 py-1 bg-gray-800 text-white rounded-md text-sm">
+                                  {car}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-gray-400 italic">No favorite cars specified.</p>
+                          )}
+                        </div>
+                        
+                        <div>
+                          <h3 className="text-md font-semibold">Series Focus</h3>
+                          {currentRacer.series_focus && currentRacer.series_focus.length > 0 ? (
+                            <div className="flex flex-wrap gap-2 mt-2">
+                              {currentRacer.series_focus.map((series, idx) => (
+                                <span key={idx} className="px-3 py-1 bg-gray-800 text-white rounded-md text-sm">
+                                  {series}
+                                </span>
+                              ))}
+                            </div>
+                          ) : (
+                            <p className="text-gray-400 italic">No series focus specified.</p>
+                          )}
+                        </div>
+                        
+                        <div className="grid grid-cols-2 gap-4">
+                          <div>
+                            <h3 className="text-md font-semibold">Commitment Level</h3>
+                            <p className="text-gray-300">{currentRacer.commitment_level || "Not specified"}</p>
+                          </div>
+                          
+                          <div>
+                            <h3 className="text-md font-semibold">Weekly Availability</h3>
+                            <p className="text-gray-300">{currentRacer.availability_hours ? `${currentRacer.availability_hours} hours` : "Not specified"}</p>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </CardContent>
+                </Card>
+                
+                <Card className="racing-card">
+                  <CardHeader className="pb-2">
+                    <CardTitle className="font-rajdhani">Roles & Skills</CardTitle>
                   </CardHeader>
                   <CardContent>
                     <div className="flex flex-wrap gap-2 mb-4">
@@ -379,36 +647,16 @@ const MyRacerProfile: React.FC = () => {
                       ))}
                     </div>
                     
-                    {isEditing && (
-                      <p className="text-sm text-gray-400">
-                        Role tags are earned through achievements and participation in events.
-                      </p>
-                    )}
-                  </CardContent>
-                </Card>
-                
-                <Card className="racing-card">
-                  <CardHeader className="pb-2">
-                    <CardTitle className="flex justify-between items-center font-rajdhani">
-                      <span>Reputation</span>
-                      <div className="flex items-center">
-                        <ThumbsUp size={18} className="mr-1 text-green-400" />
-                        <span>{currentRacer.reputation}%</span>
+                    <div className="mt-4">
+                      <h3 className="text-md font-semibold">Driving Styles</h3>
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {currentRacer.driving_styles.map((style, idx) => (
+                          <span key={idx} className="px-3 py-1 bg-gray-800 text-white rounded-md text-sm">
+                            {style}
+                          </span>
+                        ))}
                       </div>
-                    </CardTitle>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="h-2 bg-gray-800 rounded-full overflow-hidden">
-                      <div 
-                        className="h-full bg-green-500" 
-                        style={{ width: `${currentRacer.reputation}%` }}
-                      />
                     </div>
-                    
-                    <p className="mt-4 text-sm text-gray-400">
-                      Your reputation is based on feedback from other racers and teams you've raced with. 
-                      Clean racing and good sportsmanship will increase your reputation.
-                    </p>
                   </CardContent>
                 </Card>
               </div>
@@ -416,106 +664,78 @@ const MyRacerProfile: React.FC = () => {
           </TabsContent>
           
           <TabsContent value="stats">
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-              <Card className="racing-card mb-6 lg:col-span-2">
-                <CardHeader className="pb-2">
-                  <CardTitle className="flex justify-between">
-                    <span className="font-rajdhani">iRacing Stats</span>
-                    <LicenseClassBadge licenseClass={currentRacer.iracing_stats.license_class} size="md" />
-                  </CardTitle>
+            <div className="grid grid-cols-1 gap-8">
+              <Card className="racing-card">
+                <CardHeader>
+                  <CardTitle className="font-rajdhani">Racing Statistics by Discipline</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {isEditing ? (
-                    <div className="grid grid-cols-2 gap-4">
-                      <div>
-                        <Label htmlFor="irating">iRating</Label>
-                        <Input
-                          id="irating"
-                          name="iracing_stats.irating"
-                          value={formData.iracing_stats.irating}
-                          onChange={handleInputChange}
-                          type="number"
-                          className="bg-gray-800 border-gray-700"
-                        />
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="safety_rating">Safety Rating</Label>
-                        <Input
-                          id="safety_rating"
-                          name="iracing_stats.safety_rating"
-                          value={formData.iracing_stats.safety_rating}
-                          onChange={handleInputChange}
-                          type="number"
-                          step="0.1"
-                          min="0"
-                          max="5"
-                          className="bg-gray-800 border-gray-700"
-                        />
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="license_class">License Class</Label>
-                        <select
-                          id="license_class"
-                          name="iracing_stats.license_class"
-                          value={formData.iracing_stats.license_class}
-                          onChange={handleInputChange}
-                          className="w-full bg-gray-800 text-white border border-gray-700 rounded-md px-3 py-2"
-                        >
-                          <option value="rookie">Rookie</option>
-                          <option value="D">D</option>
-                          <option value="C">C</option>
-                          <option value="B">B</option>
-                          <option value="A">A</option>
-                          <option value="pro">PRO</option>
-                          <option value="black">World Championship</option>
-                        </select>
-                      </div>
-                      
-                      <div>
-                        <Label htmlFor="tt_rating">Time Trial Rating</Label>
-                        <Input
-                          id="tt_rating"
-                          name="iracing_stats.tt_rating"
-                          value={formData.iracing_stats.tt_rating}
-                          onChange={handleInputChange}
-                          type="number"
-                          className="bg-gray-800 border-gray-700"
-                        />
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                      <div className="text-center bg-gray-800 rounded-md p-3">
-                        <span className="text-sm text-gray-400">iRating</span>
-                        <div className="text-xl font-bold">{currentRacer.iracing_stats.irating}</div>
-                      </div>
-                      <div className="text-center bg-gray-800 rounded-md p-3">
-                        <span className="text-sm text-gray-400">Safety Rating</span>
-                        <div className="text-xl font-bold">{currentRacer.iracing_stats.safety_rating.toFixed(2)}</div>
-                      </div>
-                      <div className="text-center bg-gray-800 rounded-md p-3">
-                        <span className="text-sm text-gray-400">License Class</span>
-                        <div className="text-xl font-bold">{currentRacer.iracing_stats.license_class}</div>
-                      </div>
-                      <div className="text-center bg-gray-800 rounded-md p-3">
-                        <span className="text-sm text-gray-400">Time Trial Rating</span>
-                        <div className="text-xl font-bold">{currentRacer.iracing_stats.tt_rating}</div>
-                      </div>
-                    </div>
-                  )}
+                  <Tabs defaultValue="road" className="w-full">
+                    <TabsList className="w-full justify-start mb-4">
+                      <TabsTrigger value="road">Road</TabsTrigger>
+                      <TabsTrigger value="oval">Oval</TabsTrigger>
+                      <TabsTrigger value="dirt_road">Dirt Road</TabsTrigger>
+                      <TabsTrigger value="dirt_oval">Dirt Oval</TabsTrigger>
+                      <TabsTrigger value="rx">Rallycross</TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="road">
+                      <StatsDisciplineContent stats={currentRacer.statsByDiscipline.road} />
+                    </TabsContent>
+                    
+                    <TabsContent value="oval">
+                      <StatsDisciplineContent stats={currentRacer.statsByDiscipline.oval} />
+                    </TabsContent>
+                    
+                    <TabsContent value="dirt_road">
+                      <StatsDisciplineContent stats={currentRacer.statsByDiscipline.dirt_road} />
+                    </TabsContent>
+                    
+                    <TabsContent value="dirt_oval">
+                      <StatsDisciplineContent stats={currentRacer.statsByDiscipline.dirt_oval} />
+                    </TabsContent>
+                    
+                    <TabsContent value="rx">
+                      <StatsDisciplineContent stats={currentRacer.statsByDiscipline.rx} />
+                    </TabsContent>
+                  </Tabs>
                 </CardContent>
               </Card>
-              
-              <Card className="racing-card lg:col-span-1">
-                <CardHeader className="pb-2">
-                  <CardTitle className="font-rajdhani">Stats by Discipline</CardTitle>
+            </div>
+          </TabsContent>
+          
+          <TabsContent value="teams">
+            <div className="grid grid-cols-1 gap-8">
+              <Card className="racing-card">
+                <CardHeader className="flex flex-row items-center justify-between">
+                  <CardTitle className="font-rajdhani">My Teams</CardTitle>
+                  <Button className="racing-btn">Create Team</Button>
                 </CardHeader>
-                <CardContent className="text-center">
-                  <p className="text-gray-400 py-8">
-                    Detailed statistics by racing discipline will be displayed here.
-                  </p>
+                <CardContent>
+                  {userTeams && userTeams.length > 0 ? (
+                    <div className="space-y-4">
+                      {userTeams.map((team, idx) => (
+                        <div key={idx} className="border border-gray-800 rounded-lg p-4 flex items-center justify-between">
+                          <div className="flex items-center">
+                            <Avatar className="h-12 w-12 mr-4">
+                              <AvatarImage src={team.logo_url} alt={team.name} />
+                              <AvatarFallback>{team.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                            </Avatar>
+                            <div>
+                              <h3 className="font-semibold text-lg">{team.name}</h3>
+                              <p className="text-sm text-gray-400">Role: Team Manager</p>
+                            </div>
+                          </div>
+                          <Button variant="outline">View Team</Button>
+                        </div>
+                      ))}
+                    </div>
+                  ) : (
+                    <div className="text-center py-8">
+                      <p className="text-gray-400">You are not a member of any teams yet.</p>
+                      <Button className="mt-4 racing-btn">Find a Team</Button>
+                    </div>
+                  )}
                 </CardContent>
               </Card>
             </div>
@@ -600,6 +820,80 @@ const MyRacerProfile: React.FC = () => {
         </Tabs>
       </div>
     </AppLayout>
+  );
+};
+
+// Helper component to render stats for each discipline
+const StatsDisciplineContent: React.FC<{ stats: any }> = ({ stats }) => {
+  if (!stats.irating && !stats.sr && !stats.licence) {
+    return (
+      <div className="text-center py-12">
+        <p className="text-gray-400">No data available for this discipline.</p>
+      </div>
+    );
+  }
+  
+  return (
+    <div className="space-y-6">
+      <div className="bg-gray-800 p-4 rounded-lg">
+        <div className="flex justify-between items-center mb-4">
+          <h3 className="text-lg font-semibold">Ratings & License</h3>
+          {stats.licence && (
+            <LicenseClassBadge licenseClass={stats.licence} size="lg" />
+          )}
+        </div>
+        
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
+          <div>
+            <p className="text-xs text-gray-400">iRating</p>
+            <p className="text-2xl font-bold">{stats.irating || '-'}</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-400">Safety Rating</p>
+            <p className="text-2xl font-bold">{stats.sr ? stats.sr.toFixed(2) : '-'}</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-400">Time Trial Rating</p>
+            <p className="text-2xl font-bold">{stats.tt || '-'}</p>
+          </div>
+        </div>
+      </div>
+      
+      <div className="bg-gray-800 p-4 rounded-lg">
+        <h3 className="text-lg font-semibold mb-4">Race Statistics</h3>
+        
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
+          <div>
+            <p className="text-xs text-gray-400">Races</p>
+            <p className="text-2xl font-bold">{stats.starts || '-'}</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-400">Wins</p>
+            <p className="text-2xl font-bold">{stats.wins || '-'}</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-400">Top 5</p>
+            <p className="text-2xl font-bold">{stats.top5 || '-'}</p>
+          </div>
+          <div>
+            <p className="text-xs text-gray-400">Avg. Finish</p>
+            <p className="text-2xl font-bold">{stats.avg_finish ? stats.avg_finish.toFixed(1) : '-'}</p>
+          </div>
+        </div>
+        
+        {stats.wins && stats.starts && (
+          <div className="mt-4">
+            <p className="text-sm text-gray-400">Win Rate: {((stats.wins / stats.starts) * 100).toFixed(1)}%</p>
+            <div className="h-2 bg-gray-700 rounded-full mt-1">
+              <div 
+                className="h-full bg-green-500 rounded-full" 
+                style={{ width: `${(stats.wins / stats.starts) * 100}%` }}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
   );
 };
 
