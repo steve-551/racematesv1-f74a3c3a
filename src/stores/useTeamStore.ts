@@ -1,7 +1,6 @@
-
 import { create } from 'zustand';
 import { supabase } from '@/lib/supabaseClient';
-import { RacerProfile } from '@/stores/useRacerStore';
+import { Racer } from '@/stores/useRacerStore';
 
 export interface Team {
   id: string;
@@ -24,7 +23,7 @@ export interface TeamMember {
   profile_id: string;
   role: string;
   joined_at: string;
-  profile?: RacerProfile;
+  profile?: Racer; // Changed from RacerProfile to Racer
 }
 
 type TeamState = {
@@ -37,8 +36,8 @@ type TeamState = {
   
   fetchTeams: () => Promise<void>;
   fetchTeamById: (id: string) => Promise<void>;
-  fetchSuggestedTeams: () => Promise<void>;
   fetchTeamMembers: (teamId: string) => Promise<void>;
+  fetchSuggestedTeams: () => Promise<void>;
   createTeam: (teamData: Partial<Team>) => Promise<Team | null>;
   updateTeam: (id: string, teamData: Partial<Team>) => Promise<void>;
   joinTeam: (teamId: string, role: string) => Promise<void>;
