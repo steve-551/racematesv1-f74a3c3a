@@ -195,7 +195,7 @@ const MyRacerProfile: React.FC = () => {
           </Button>
         </div>
         
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        <Tabs defaultValue={activeTab} value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="bg-racing-dark-alt mb-6">
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="stats">Racing Stats</TabsTrigger>
