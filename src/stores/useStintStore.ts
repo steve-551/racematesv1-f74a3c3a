@@ -21,6 +21,7 @@ type StintState = {
   
   createStint: (stint: Omit<Stint, 'id' | 'created_at' | 'updated_at'>) => Promise<void>;
   fetchStintsForEvent: (eventId: string) => Promise<void>;
+  fetchStintsByTeam: (teamId: string) => Promise<void>;
   updateStint: (id: string, updates: Partial<Stint>) => Promise<void>;
   deleteStint: (id: string) => Promise<void>;
 };
@@ -75,6 +76,28 @@ export const useStintStore = create<StintState>((set) => ({
       set({ stints: data || [], isLoading: false });
     } catch (error: any) {
       console.error('Error fetching stints:', error);
+      set({ error: error.message, isLoading: false });
+    }
+  },
+  
+  fetchStintsByTeam: async (teamId) => {
+    try {
+      set({ isLoading: true, error: null });
+      
+      const { data, error } = await supabase
+        .from('stints')
+        .select('*')
+        .eq('team_id', teamId);
+      
+      if (error) {
+        console.error('Error fetching team stints:', error);
+        set({ error: error.message, isLoading: false });
+        return;
+      }
+      
+      set({ stints: data || [], isLoading: false });
+    } catch (error: any) {
+      console.error('Error fetching team stints:', error);
       set({ error: error.message, isLoading: false });
     }
   },

@@ -1,293 +1,557 @@
 
 import React, { useState, useEffect } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { useSetupStore, Setup } from '@/stores/useSetupStore';
+import { useRacerStore } from '@/stores/useRacerStore';
+import { useTeamStore } from '@/stores/useTeamStore';
+import { useProfile } from '@/components/providers/ProfileProvider';
+import { useFriendshipStore } from '@/stores/useFriendshipStore';
+import MainLayout from '@/components/layout/MainLayout';
+import SetupCard from '@/components/setup/SetupCard';
 import { Button } from '@/components/ui/button';
-import { useSetupStore } from '@/stores/useSetupStore';
-import { Search, Filter, X, Upload, ThumbsUp, Share2 } from 'lucide-react';
-import { Badge } from '@/components/ui/badge';
-import AppLayout from '@/components/layout/AppLayout';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "@/components/ui/tabs";
+import { toast } from 'sonner';
+import { Plus, Loader2, FileUp, Share2, AlertCircle } from 'lucide-react';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Card, CardContent, CardHeader } from '@/components/ui/card';
 
-interface Setup {
-  id: string;
-  title: string;
-  car_model: string;
-  track_name: string;
-  sim_platform: string;
-  description: string;
-  owner_id: string;
-  shared_with: 'team' | 'friends' | 'public';
-  thumbs_up: number;
-}
-
-const SetupVault: React.FC = () => {
-  const { setups, fetchSetups } = useSetupStore();
-  const [showFilters, setShowFilters] = useState(false);
-  const [filters, setFilters] = useState({
-    platform: '',
-    track: '',
-    carClass: ''
+const SetupVault = () => {
+  const [activeTab, setActiveTab] = useState('my-setups');
+  const [isCreateDialogOpen, setIsCreateDialogOpen] = useState(false);
+  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
+  const [isShareDialogOpen, setIsShareDialogOpen] = useState(false);
+  const [selectedSetup, setSelectedSetup] = useState<Setup | null>(null);
+  const [setupFile, setSetupFile] = useState<File | null>(null);
+  const [setupForm, setSetupForm] = useState({
+    title: '',
+    description: '',
+    car_model: '',
+    track_name: '',
+    sim_platform: '',
+    visibility: 'private' as 'private' | 'team' | 'friends' | 'public'
   });
+  const [shareWith, setShareWith] = useState('');
+  const [shareType, setShareType] = useState('team'); // 'team' or 'friend'
   
-  const [mockSetups] = useState<Setup[]>([
-    {
-      id: '1',
-      title: 'Spa GT3 Dry Setup',
-      car_model: 'Ferrari 488 GT3 Evo',
-      track_name: 'Spa-Francorchamps',
-      sim_platform: 'iRacing',
-      description: 'Optimized for low fuel quali. Stable through Eau Rouge.',
-      owner_id: 'user1',
-      shared_with: 'team',
-      thumbs_up: 24
-    },
-    {
-      id: '2',
-      title: 'Monza Low Downforce',
-      car_model: 'Porsche 911 GT3 R',
-      track_name: 'Monza',
-      sim_platform: 'ACC',
-      description: 'Super fast on straights, careful in Ascari.',
-      owner_id: 'user1',
-      shared_with: 'public',
-      thumbs_up: 18
-    },
-    {
-      id: '3',
-      title: 'Nürburgring Endurance',
-      car_model: 'BMW M4 GT3',
-      track_name: 'Nürburgring',
-      sim_platform: 'iRacing',
-      description: 'Balanced setup for 6h races. Good on tires.',
-      owner_id: 'user2',
-      shared_with: 'friends',
-      thumbs_up: 12
-    },
-    {
-      id: '4',
-      title: 'Silverstone Wet',
-      car_model: 'Mercedes AMG GT3',
-      track_name: 'Silverstone',
-      sim_platform: 'ACC',
-      description: 'Perfect for heavy rain conditions. High downforce.',
-      owner_id: 'user3',
-      shared_with: 'team',
-      thumbs_up: 9
-    },
-    {
-      id: '5',
-      title: 'Suzuka Qualifying',
-      car_model: 'Audi R8 LMS Evo II',
-      track_name: 'Suzuka',
-      sim_platform: 'iRacing',
-      description: 'Maximum attack setup for quali. One lap wonder.',
-      owner_id: 'user1',
-      shared_with: 'public',
-      thumbs_up: 32
-    },
-    {
-      id: '6',
-      title: 'Watkins Glen Race',
-      car_model: 'Lamborghini Huracán GT3 Evo',
-      track_name: 'Watkins Glen',
-      sim_platform: 'iRacing',
-      description: 'Good all-around setup for full race distance.',
-      owner_id: 'user2',
-      shared_with: 'friends',
-      thumbs_up: 15
-    }
-  ]);
-
+  const { 
+    setups, 
+    setupFiles, 
+    isLoading, 
+    createSetup, 
+    fetchSetups, 
+    fetchSetupFiles, 
+    uploadSetupFile, 
+    deleteSetup, 
+    shareSetupWithTeam, 
+    shareSetupWithFriend
+  } = useSetupStore();
+  const { currentRacer } = useRacerStore();
+  const { userTeams } = useProfile();
+  const { friends, fetchFriends } = useFriendshipStore();
+  
   useEffect(() => {
     fetchSetups();
-  }, [fetchSetups]);
-
-  const toggleFilters = () => {
-    setShowFilters(!showFilters);
-  };
+    fetchFriends();
+  }, [fetchSetups, fetchFriends]);
   
-  const handleFilterChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+  useEffect(() => {
+    if (selectedSetup) {
+      fetchSetupFiles(selectedSetup.id);
+    }
+  }, [selectedSetup, fetchSetupFiles]);
+  
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const { name, value } = e.target;
-    setFilters({
-      ...filters,
+    setSetupForm(prev => ({
+      ...prev,
       [name]: value
-    });
+    }));
   };
   
-  const clearFilters = () => {
-    setFilters({
-      platform: '',
-      track: '',
-      carClass: ''
-    });
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      setSetupFile(e.target.files[0]);
+    }
   };
-
-  const platforms = ['iRacing', 'ACC', 'GT7', 'F1', 'RaceRoom', 'Automobilista', 'rFactor'];
-  const tracks = ['Spa-Francorchamps', 'Monza', 'Nürburgring', 'Silverstone', 'Suzuka', 'Watkins Glen', 'Le Mans', 'Daytona'];
-  const carClasses = ['GT3', 'GT4', 'LMP2', 'F1', 'NASCAR', 'TCR'];
-
-  const getSharedBadge = (sharedWith: string) => {
-    switch (sharedWith) {
-      case 'team':
-        return <Badge variant="secondary" className="bg-blue-900 hover:bg-blue-800">Team</Badge>;
-      case 'friends':
-        return <Badge variant="secondary" className="bg-green-900 hover:bg-green-800">Friends</Badge>;
-      case 'public':
-        return <Badge variant="secondary" className="bg-purple-900 hover:bg-purple-800">Public</Badge>;
-      default:
-        return <Badge variant="secondary" className="bg-gray-700 hover:bg-gray-600">Private</Badge>;
+  
+  const handleCreateSetup = async () => {
+    try {
+      const setupData = {
+        ...setupForm,
+      };
+      
+      const createdSetup = await createSetup(setupData);
+      
+      if (createdSetup && setupFile) {
+        await uploadSetupFile(createdSetup.id, setupFile);
+      }
+      
+      toast.success('Setup created successfully');
+      setIsCreateDialogOpen(false);
+      setSetupForm({
+        title: '',
+        description: '',
+        car_model: '',
+        track_name: '',
+        sim_platform: '',
+        visibility: 'private'
+      });
+      setSetupFile(null);
+    } catch (error) {
+      console.error('Error creating setup:', error);
+      toast.error('Failed to create setup');
+    }
+  };
+  
+  const handleViewSetup = (setup: Setup) => {
+    setSelectedSetup(setup);
+    setIsViewDialogOpen(true);
+  };
+  
+  const handleShareSetup = (setup: Setup) => {
+    setSelectedSetup(setup);
+    setIsShareDialogOpen(true);
+  };
+  
+  const handleDeleteSetup = async (setup: Setup) => {
+    try {
+      await deleteSetup(setup.id);
+      toast.success('Setup deleted successfully');
+    } catch (error) {
+      console.error('Error deleting setup:', error);
+      toast.error('Failed to delete setup');
+    }
+  };
+  
+  const handleShareSubmit = async () => {
+    if (!selectedSetup || !shareWith) {
+      toast.error('Please select who to share with');
+      return;
+    }
+    
+    try {
+      if (shareType === 'team') {
+        await shareSetupWithTeam(selectedSetup.id, shareWith);
+        toast.success('Setup shared with team');
+      } else {
+        await shareSetupWithFriend(selectedSetup.id, shareWith);
+        toast.success('Setup shared with friend');
+      }
+      
+      setIsShareDialogOpen(false);
+      setShareWith('');
+    } catch (error) {
+      console.error('Error sharing setup:', error);
+      toast.error('Failed to share setup');
     }
   };
 
+  const mySetups = setups.filter(setup => currentRacer && setup.owner_id === currentRacer.id);
+  const teamSetups = setups.filter(setup => setup.visibility === 'team' && userTeams.some(team => team.id === setup.team_id));
+  
   return (
-    <AppLayout>
+    <MainLayout>
       <div className="container mx-auto px-4 py-8">
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-orbitron font-bold">Setup Vault</h1>
-          
-          <div className="flex gap-2">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
+          <h1 className="text-3xl font-bold font-orbitron">Setup Vault</h1>
+          <Button 
+            onClick={() => setIsCreateDialogOpen(true)} 
+            className="mt-4 md:mt-0"
+          >
+            <Plus className="h-4 w-4 mr-2" />
+            Upload Setup
+          </Button>
+        </div>
+        
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="mb-6">
+          <TabsList>
+            <TabsTrigger value="my-setups">My Setups</TabsTrigger>
+            <TabsTrigger value="team-setups">Team Setups</TabsTrigger>
+            <TabsTrigger value="shared-setups">Shared with Me</TabsTrigger>
+          </TabsList>
+        </Tabs>
+        
+        <TabsContent value="my-setups">
+          {isLoading ? (
+            <div className="text-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-gray-400" />
+              <p>Loading your setups...</p>
+            </div>
+          ) : mySetups.length === 0 ? (
+            <div className="text-center py-12">
+              <FileUp className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+              <h2 className="text-xl font-semibold mb-2">No Setups Yet</h2>
+              <p className="text-gray-500 mb-6">Upload your first car setup to get started</p>
+              <Button onClick={() => setIsCreateDialogOpen(true)}>Upload Setup</Button>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {mySetups.map(setup => (
+                <SetupCard
+                  key={setup.id}
+                  setup={setup}
+                  onView={handleViewSetup}
+                  onShare={handleShareSetup}
+                  onDelete={handleDeleteSetup}
+                  isOwner={true}
+                />
+              ))}
+            </div>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="team-setups">
+          {isLoading ? (
+            <div className="text-center py-12">
+              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-gray-400" />
+              <p>Loading team setups...</p>
+            </div>
+          ) : teamSetups.length === 0 ? (
+            <div className="text-center py-12">
+              <Share2 className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+              <h2 className="text-xl font-semibold mb-2">No Team Setups</h2>
+              <p className="text-gray-500 mb-6">Teams you belong to haven't shared any setups yet</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {teamSetups.map(setup => (
+                <SetupCard
+                  key={setup.id}
+                  setup={setup}
+                  onView={handleViewSetup}
+                  onShare={() => {}}
+                  onDelete={() => {}}
+                  isOwner={currentRacer ? setup.owner_id === currentRacer.id : false}
+                />
+              ))}
+            </div>
+          )}
+        </TabsContent>
+        
+        <TabsContent value="shared-setups">
+          <div className="text-center py-12">
+            <Share2 className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+            <h2 className="text-xl font-semibold mb-2">Shared Setups</h2>
+            <p className="text-gray-500">Setups shared directly with you will appear here</p>
+          </div>
+        </TabsContent>
+      </div>
+      
+      {/* Create Setup Dialog */}
+      <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Upload New Setup</DialogTitle>
+            <DialogDescription>
+              Share your car setup with your team or keep it private
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-4 py-4">
+            <div className="grid gap-2">
+              <Label htmlFor="title">Setup Title</Label>
+              <Input
+                id="title"
+                name="title"
+                placeholder="E.g., Spa GT3 Dry Weather"
+                value={setupForm.title}
+                onChange={handleInputChange}
+              />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="car_model">Car Model</Label>
+                <Input
+                  id="car_model"
+                  name="car_model"
+                  placeholder="E.g., Ferrari 488 GT3"
+                  value={setupForm.car_model}
+                  onChange={handleInputChange}
+                />
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="track_name">Track</Label>
+                <Input
+                  id="track_name"
+                  name="track_name"
+                  placeholder="E.g., Spa-Francorchamps"
+                  value={setupForm.track_name}
+                  onChange={handleInputChange}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid gap-2">
+                <Label htmlFor="sim_platform">Sim Platform</Label>
+                <Select
+                  name="sim_platform"
+                  value={setupForm.sim_platform}
+                  onValueChange={(value) => setSetupForm(prev => ({ ...prev, sim_platform: value }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select platform" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="iRacing">iRacing</SelectItem>
+                    <SelectItem value="ACC">Assetto Corsa Competizione</SelectItem>
+                    <SelectItem value="F1">F1 Series</SelectItem>
+                    <SelectItem value="GT7">Gran Turismo 7</SelectItem>
+                    <SelectItem value="rFactor">rFactor</SelectItem>
+                    <SelectItem value="AMS2">Automobilista 2</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid gap-2">
+                <Label htmlFor="visibility">Visibility</Label>
+                <Select
+                  name="visibility"
+                  value={setupForm.visibility}
+                  onValueChange={(value) => setSetupForm(prev => ({ ...prev, visibility: value as any }))}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select visibility" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="private">Private</SelectItem>
+                    <SelectItem value="team">Team</SelectItem>
+                    <SelectItem value="friends">Friends</SelectItem>
+                    <SelectItem value="public">Public</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="description">Description (Optional)</Label>
+              <Textarea
+                id="description"
+                name="description"
+                placeholder="Add notes about the setup, conditions it works best in, etc."
+                value={setupForm.description}
+                onChange={handleInputChange}
+                rows={3}
+              />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="file">Setup File</Label>
+              <Input
+                id="file"
+                type="file"
+                onChange={handleFileChange}
+                accept=".svm,.json,.txt,.sto,.ini,.setup"
+              />
+              <p className="text-xs text-gray-500">
+                Upload the setup file from your simulator (.svm, .json, .txt, etc.)
+              </p>
+            </div>
+          </div>
+          <DialogFooter>
             <Button 
               variant="outline" 
-              onClick={toggleFilters} 
-              className="flex items-center"
+              onClick={() => setIsCreateDialogOpen(false)}
             >
-              <Filter size={18} className="mr-1" />
-              {showFilters ? 'Hide Filters' : 'Show Filters'}
+              Cancel
             </Button>
-            
-            <Button className="racing-btn">
-              <Upload size={18} className="mr-1" /> Upload Setup
+            <Button 
+              onClick={handleCreateSetup}
+              disabled={!setupForm.title || !setupForm.car_model || !setupForm.track_name || !setupForm.sim_platform}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Uploading...
+                </>
+              ) : 'Upload Setup'}
             </Button>
-          </div>
-        </div>
-        
-        {showFilters && (
-          <div className="mb-6 p-4 bg-racing-dark-alt border border-gray-800 rounded-lg">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Platform</label>
-                <select 
-                  name="platform"
-                  value={filters.platform}
-                  onChange={handleFilterChange}
-                  className="w-full bg-gray-800 text-white border border-gray-700 rounded-md px-3 py-2"
-                >
-                  <option value="">All Platforms</option>
-                  {platforms.map(platform => (
-                    <option key={platform} value={platform}>{platform}</option>
-                  ))}
-                </select>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* View Setup Dialog */}
+      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
+        <DialogContent className="sm:max-w-[600px]">
+          <DialogHeader>
+            <DialogTitle>{selectedSetup?.title}</DialogTitle>
+            <DialogDescription>
+              Setup details and files
+            </DialogDescription>
+          </DialogHeader>
+          {selectedSetup && (
+            <div className="py-4">
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <Label className="text-xs text-gray-500">Car Model</Label>
+                  <p className="font-medium">{selectedSetup.car_model}</p>
+                </div>
+                <div>
+                  <Label className="text-xs text-gray-500">Track</Label>
+                  <p className="font-medium">{selectedSetup.track_name}</p>
+                </div>
               </div>
               
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Track</label>
-                <select 
-                  name="track"
-                  value={filters.track}
-                  onChange={handleFilterChange}
-                  className="w-full bg-gray-800 text-white border border-gray-700 rounded-md px-3 py-2"
-                >
-                  <option value="">All Tracks</option>
-                  {tracks.map(track => (
-                    <option key={track} value={track}>{track}</option>
-                  ))}
-                </select>
+              <div className="grid grid-cols-2 gap-4 mb-4">
+                <div>
+                  <Label className="text-xs text-gray-500">Platform</Label>
+                  <p className="font-medium">{selectedSetup.sim_platform}</p>
+                </div>
+                <div>
+                  <Label className="text-xs text-gray-500">Visibility</Label>
+                  <p className="font-medium capitalize">{selectedSetup.visibility}</p>
+                </div>
               </div>
               
-              <div>
-                <label className="block text-sm font-medium text-gray-300 mb-1">Car Class</label>
-                <select 
-                  name="carClass"
-                  value={filters.carClass}
-                  onChange={handleFilterChange}
-                  className="w-full bg-gray-800 text-white border border-gray-700 rounded-md px-3 py-2"
-                >
-                  <option value="">All Car Classes</option>
-                  {carClasses.map(carClass => (
-                    <option key={carClass} value={carClass}>{carClass}</option>
-                  ))}
-                </select>
+              {selectedSetup.description && (
+                <div className="mb-4">
+                  <Label className="text-xs text-gray-500">Description</Label>
+                  <p className="mt-1">{selectedSetup.description}</p>
+                </div>
+              )}
+              
+              <div className="mt-6">
+                <h4 className="text-sm font-semibold mb-2">Setup Files</h4>
+                {isLoading ? (
+                  <div className="text-center py-4">
+                    <Loader2 className="h-4 w-4 animate-spin mx-auto mb-2" />
+                    <p className="text-sm text-gray-500">Loading files...</p>
+                  </div>
+                ) : setupFiles[selectedSetup.id]?.length ? (
+                  <div className="space-y-2">
+                    {setupFiles[selectedSetup.id].map(file => (
+                      <Card key={file.id}>
+                        <CardContent className="p-3 flex justify-between items-center">
+                          <div className="flex items-center space-x-3">
+                            <FileUp className="h-5 w-5 text-gray-500" />
+                            <div>
+                              <p className="font-medium text-sm">{file.file_name}</p>
+                              <p className="text-xs text-gray-500">
+                                {(file.file_size / 1024).toFixed(1)} KB
+                              </p>
+                            </div>
+                          </div>
+                          <Button size="sm" variant="outline">Download</Button>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center py-4 bg-gray-50 rounded-md">
+                    <AlertCircle className="h-6 w-6 mx-auto mb-2 text-gray-400" />
+                    <p className="text-sm text-gray-500">No setup files attached</p>
+                  </div>
+                )}
               </div>
             </div>
-            
-            <div className="mt-4 flex justify-end space-x-2">
-              <Button 
-                variant="outline" 
-                onClick={clearFilters} 
-                className="flex items-center"
+          )}
+        </DialogContent>
+      </Dialog>
+      
+      {/* Share Setup Dialog */}
+      <Dialog open={isShareDialogOpen} onOpenChange={setIsShareDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Share Setup</DialogTitle>
+            <DialogDescription>
+              Share your setup with a team or friend
+            </DialogDescription>
+          </DialogHeader>
+          <div className="py-4">
+            <div className="flex space-x-4 mb-4">
+              <Button
+                variant={shareType === 'team' ? 'default' : 'outline'}
+                className="flex-1"
+                onClick={() => setShareType('team')}
               >
-                <X size={16} className="mr-1" />
-                Clear
+                Team
               </Button>
-              <Button className="racing-btn">Apply Filters</Button>
+              <Button
+                variant={shareType === 'friend' ? 'default' : 'outline'}
+                className="flex-1"
+                onClick={() => setShareType('friend')}
+              >
+                Friend
+              </Button>
             </div>
+            
+            {shareType === 'team' ? (
+              userTeams.length === 0 ? (
+                <div className="text-center py-4">
+                  <p className="text-gray-500">You don't belong to any teams yet</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <Label>Select Team</Label>
+                  <Select value={shareWith} onValueChange={setShareWith}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose a team" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {userTeams.map(team => (
+                        <SelectItem key={team.id} value={team.id}>
+                          {team.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )
+            ) : (
+              friends.length === 0 ? (
+                <div className="text-center py-4">
+                  <p className="text-gray-500">You don't have any friends yet</p>
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  <Label>Select Friend</Label>
+                  <Select value={shareWith} onValueChange={setShareWith}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Choose a friend" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {friends.map(friend => {
+                        const friendDetails = friend.requestor?.id === currentRacer?.id ? friend.addressee : friend.requestor;
+                        return (
+                          <SelectItem key={friend.id} value={friendDetails?.id || ''}>
+                            {friendDetails?.display_name}
+                          </SelectItem>
+                        );
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )
+            )}
           </div>
-        )}
-        
-        <div className="relative mb-6">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
-          <input 
-            type="text" 
-            placeholder="Search setups by name, car, or track..." 
-            className="w-full pl-10 pr-4 py-3 bg-racing-dark-alt text-white border border-gray-700 rounded-md focus:outline-none focus:ring-1 focus:ring-racing-red"
-          />
-        </div>
-        
-        <div className="overflow-hidden bg-racing-dark-alt border border-gray-800 rounded-lg">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead>
-                <tr className="border-b border-gray-800">
-                  <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Setup Name</th>
-                  <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Platform / Car / Track</th>
-                  <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Notes</th>
-                  <th className="py-3 px-4 text-left text-xs font-semibold uppercase tracking-wider text-gray-400">Shared With</th>
-                  <th className="py-3 px-4 text-center text-xs font-semibold uppercase tracking-wider text-gray-400">Likes</th>
-                  <th className="py-3 px-4 text-right text-xs font-semibold uppercase tracking-wider text-gray-400">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-800">
-                {mockSetups.map(setup => (
-                  <tr key={setup.id} className="hover:bg-gray-800/50">
-                    <td className="py-4 px-4 whitespace-nowrap font-medium">{setup.title}</td>
-                    <td className="py-4 px-4">
-                      <div className="flex flex-col">
-                        <span className="font-medium">{setup.sim_platform}</span>
-                        <span className="text-sm text-gray-400">{setup.car_model} / {setup.track_name}</span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      <div className="max-w-xs truncate text-sm text-gray-300">
-                        {setup.description}
-                      </div>
-                    </td>
-                    <td className="py-4 px-4">
-                      {getSharedBadge(setup.shared_with)}
-                    </td>
-                    <td className="py-4 px-4 text-center">
-                      <div className="flex items-center justify-center">
-                        <ThumbsUp size={16} className="mr-1 text-gray-400" />
-                        <span>{setup.thumbs_up}</span>
-                      </div>
-                    </td>
-                    <td className="py-4 px-4 text-right">
-                      <div className="flex justify-end space-x-2">
-                        <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
-                          <ThumbsUp size={16} />
-                        </Button>
-                        <Button size="sm" variant="ghost" className="h-8 w-8 p-0">
-                          <Share2 size={16} />
-                        </Button>
-                        <Button size="sm" variant="secondary" className="text-xs">Download</Button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
-      </div>
-    </AppLayout>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsShareDialogOpen(false)}>Cancel</Button>
+            <Button 
+              onClick={handleShareSubmit}
+              disabled={!shareWith || isLoading}
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin mr-2" />
+                  Sharing...
+                </>
+              ) : 'Share Setup'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </MainLayout>
   );
 };
 

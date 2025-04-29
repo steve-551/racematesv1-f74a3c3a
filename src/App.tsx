@@ -18,6 +18,8 @@ import FindRacers from "./pages/FindRacers";
 import RacerProfile from "./pages/RacerProfile";
 import MyRacerProfile from "./pages/MyRacerProfile";
 import Onboarding from "./pages/Onboarding";
+import NoticeBoard from "./pages/NoticeBoard";
+import TeamDashboard from "./pages/TeamDashboard";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -42,6 +44,8 @@ const App = () => {
                   <Route path="/racers/:id" element={<RacerProfile />} />
                   <Route path="/profile" element={<MyRacerProfile />} />
                   <Route path="/onboarding" element={<Onboarding />} />
+                  <Route path="/notice-board" element={<NoticeBoard />} />
+                  <Route path="/team/:id" element={<TeamDashboard />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </ProfileProvider>

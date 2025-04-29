@@ -2,7 +2,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useRacerStore } from '@/stores/useRacerStore';
-import AppLayout from '@/components/layout/AppLayout';
+import { useFriendshipStore } from '@/stores/useFriendshipStore';
+import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -17,15 +18,31 @@ import { toast } from 'sonner';
 
 const RacerProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const { fetchRacerById, currentRacer, isLoading, error } = useRacerStore();
+  const { 
+    fetchRacerById, 
+    currentRacer, 
+    isLoading, 
+    error 
+  } = useRacerStore();
+  
+  const {
+    sendFriendRequest,
+    checkFriendship,
+    isLoading: isFriendshipLoading
+  } = useFriendshipStore();
+  
   const [loadingProfile, setLoadingProfile] = useState(true);
+  const [friendshipStatus, setFriendshipStatus] = useState<string | null>(null);
+  const [isSendingRequest, setIsSendingRequest] = useState(false);
 
   useEffect(() => {
-    async function loadProfile() {
+    async function loadProfileAndFriendship() {
       if (id) {
         try {
           setLoadingProfile(true);
           await fetchRacerById(id);
+          const status = await checkFriendship(id);
+          setFriendshipStatus(status);
         } catch (error) {
           console.error("Failed to load profile:", error);
           toast.error("Failed to load racer profile");
@@ -35,21 +52,37 @@ const RacerProfile: React.FC = () => {
       }
     }
     
-    loadProfile();
-  }, [id, fetchRacerById]);
+    loadProfileAndFriendship();
+  }, [id, fetchRacerById, checkFriendship]);
+
+  const handleSendFriendRequest = async () => {
+    if (!id) return;
+    
+    try {
+      setIsSendingRequest(true);
+      await sendFriendRequest(id);
+      setFriendshipStatus('pending');
+      toast.success('Friend request sent!');
+    } catch (error: any) {
+      console.error('Error sending friend request:', error);
+      toast.error(error.message || 'Failed to send friend request');
+    } finally {
+      setIsSendingRequest(false);
+    }
+  };
 
   const isProfileLoading = isLoading || loadingProfile;
 
   if (error) {
     return (
-      <AppLayout>
+      <MainLayout>
         <div className="container mx-auto px-4 py-16 text-center">
           <p className="text-lg text-red-500">Error loading racer profile: {error}</p>
           <Button variant="outline" size="sm" asChild className="mt-4">
             <Link to="/find-racers">← Back to Racers</Link>
           </Button>
         </div>
-      </AppLayout>
+      </MainLayout>
     );
   }
 
@@ -61,8 +94,35 @@ const RacerProfile: React.FC = () => {
     { key: 'rx', label: 'Rallycross (RX)' },
   ];
 
+  const renderFriendshipButton = () => {
+    if (friendshipStatus === 'accepted') {
+      return (
+        <Button className="racing-btn">
+          <MessageSquare size={16} className="mr-1" /> Message
+        </Button>
+      );
+    } else if (friendshipStatus === 'pending') {
+      return (
+        <Button variant="outline" disabled>
+          Request Pending
+        </Button>
+      );
+    } else {
+      return (
+        <Button 
+          className="racing-btn"
+          onClick={handleSendFriendRequest}
+          disabled={isSendingRequest}
+        >
+          <UserPlus size={16} className="mr-1" /> 
+          {isSendingRequest ? 'Sending...' : 'Add Friend'}
+        </Button>
+      );
+    }
+  };
+
   return (
-    <AppLayout>
+    <MainLayout>
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
           <Button variant="outline" size="sm" asChild>
@@ -185,7 +245,7 @@ const RacerProfile: React.FC = () => {
                     )}
 
                     <div className="mt-4 grid grid-cols-2 gap-2">
-                      <Button className="racing-btn"><UserPlus size={16} className="mr-1" /> Add Friend</Button>
+                      {renderFriendshipButton()}
                       <Button variant="outline"><MessageSquare size={16} className="mr-1" /> Message</Button>
                       {currentRacer.looking_for_team && (
                         <Button variant="outline" className="col-span-2">
@@ -259,7 +319,7 @@ const RacerProfile: React.FC = () => {
           </div>
         )}
       </div>
-    </AppLayout>
+    </MainLayout>
   );
 };
 
