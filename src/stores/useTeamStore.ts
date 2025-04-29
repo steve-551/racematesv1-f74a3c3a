@@ -26,10 +26,24 @@ export interface TeamMember {
   profile?: Racer; // Changed from RacerProfile to Racer
 }
 
+export interface TeamEvent {
+  id: string;
+  team_id: string;
+  creator_id: string;
+  title: string;
+  description: string | null;
+  event_type: string;
+  start_time: string;
+  end_time: string;
+  created_at: string;
+  updated_at: string;
+}
+
 type TeamState = {
   teams: Team[];
   currentTeam: Team | null;
   teamMembers: TeamMember[];
+  teamEvents: TeamEvent[];
   suggestedTeams: Team[];
   isLoading: boolean;
   error: string | null;
@@ -37,9 +51,15 @@ type TeamState = {
   fetchTeams: () => Promise<void>;
   fetchTeamById: (id: string) => Promise<void>;
   fetchTeamMembers: (teamId: string) => Promise<void>;
+  fetchTeamEvents: (teamId: string) => Promise<void>;
   fetchSuggestedTeams: () => Promise<void>;
   createTeam: (teamData: Partial<Team>) => Promise<Team | null>;
   updateTeam: (id: string, teamData: Partial<Team>) => Promise<void>;
+  createTeamEvent: (eventData: Partial<TeamEvent>) => Promise<TeamEvent | null>;
+  updateTeamEvent: (id: string, eventData: Partial<TeamEvent>) => Promise<void>;
+  deleteTeamEvent: (id: string) => Promise<void>;
+  addTeamMember: (teamId: string, profileId: string, role: string) => Promise<void>;
+  removeTeamMember: (teamMemberId: string) => Promise<void>;
   joinTeam: (teamId: string, role: string) => Promise<void>;
   leaveTeam: (teamId: string) => Promise<void>;
 };
@@ -58,7 +78,7 @@ const MOCK_TEAMS: Team[] = [
     achievements: 'Winner of 24h Nürburgring 2023, GT3 Championship runners-up',
     created_at: '2023-01-01',
     updated_at: '2023-01-01',
-    platforms: ['iRacing', 'ACC'] // Added platforms
+    platforms: ['iRacing', 'ACC']
   },
   {
     id: '2',
@@ -72,7 +92,7 @@ const MOCK_TEAMS: Team[] = [
     achievements: 'Top 3 in Formula Drift Japan Series, Multiple podiums in drift events',
     created_at: '2023-02-15',
     updated_at: '2023-02-15',
-    platforms: ['GT7', 'Automobilista'] // Added platforms
+    platforms: ['GT7', 'Automobilista']
   },
   {
     id: '3',
@@ -86,7 +106,7 @@ const MOCK_TEAMS: Team[] = [
     achievements: 'WRC-2 team champions, Multiple Dakar Rally stage wins',
     created_at: '2022-11-03',
     updated_at: '2022-11-03',
-    platforms: ['Dirt Rally', 'rFactor'] // Added platforms
+    platforms: ['Dirt Rally', 'rFactor']
   }
 ];
 
@@ -94,6 +114,7 @@ export const useTeamStore = create<TeamState>((set, get) => ({
   teams: [],
   currentTeam: null,
   teamMembers: [],
+  teamEvents: [],
   suggestedTeams: [],
   isLoading: false,
   error: null,
@@ -163,6 +184,29 @@ export const useTeamStore = create<TeamState>((set, get) => ({
       set({ teamMembers: data || [], isLoading: false });
     } catch (error: any) {
       console.error('Error fetching team members:', error);
+      set({ error: error.message, isLoading: false });
+    }
+  },
+
+  fetchTeamEvents: async (teamId) => {
+    try {
+      set({ isLoading: true, error: null });
+      
+      const { data, error } = await supabase
+        .from('team_events')
+        .select('*')
+        .eq('team_id', teamId)
+        .order('start_time', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching team events:', error);
+        set({ error: error.message, isLoading: false });
+        return;
+      }
+
+      set({ teamEvents: data || [], isLoading: false });
+    } catch (error: any) {
+      console.error('Error fetching team events:', error);
       set({ error: error.message, isLoading: false });
     }
   },
@@ -262,6 +306,147 @@ export const useTeamStore = create<TeamState>((set, get) => ({
       }));
     } catch (error: any) {
       console.error('Error updating team:', error);
+      set({ error: error.message, isLoading: false });
+    }
+  },
+
+  createTeamEvent: async (eventData) => {
+    try {
+      set({ isLoading: true, error: null });
+      
+      const { data, error } = await supabase
+        .from('team_events')
+        .insert([eventData])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error creating team event:', error);
+        set({ error: error.message, isLoading: false });
+        return null;
+      }
+
+      // Update the team events list
+      set(state => ({
+        teamEvents: [...state.teamEvents, data],
+        isLoading: false
+      }));
+      
+      return data;
+    } catch (error: any) {
+      console.error('Error creating team event:', error);
+      set({ error: error.message, isLoading: false });
+      return null;
+    }
+  },
+
+  updateTeamEvent: async (id, eventData) => {
+    try {
+      set({ isLoading: true, error: null });
+      
+      const { error } = await supabase
+        .from('team_events')
+        .update(eventData)
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error updating team event:', error);
+        set({ error: error.message, isLoading: false });
+        return;
+      }
+
+      // Update the event in state
+      set(state => ({
+        teamEvents: state.teamEvents.map(event => 
+          event.id === id ? { ...event, ...eventData } : event
+        ),
+        isLoading: false
+      }));
+    } catch (error: any) {
+      console.error('Error updating team event:', error);
+      set({ error: error.message, isLoading: false });
+    }
+  },
+
+  deleteTeamEvent: async (id) => {
+    try {
+      set({ isLoading: true, error: null });
+      
+      const { error } = await supabase
+        .from('team_events')
+        .delete()
+        .eq('id', id);
+
+      if (error) {
+        console.error('Error deleting team event:', error);
+        set({ error: error.message, isLoading: false });
+        return;
+      }
+      
+      // Remove the event from state
+      set(state => ({
+        teamEvents: state.teamEvents.filter(event => event.id !== id),
+        isLoading: false
+      }));
+    } catch (error: any) {
+      console.error('Error deleting team event:', error);
+      set({ error: error.message, isLoading: false });
+    }
+  },
+
+  addTeamMember: async (teamId, profileId, role) => {
+    try {
+      set({ isLoading: true, error: null });
+      
+      const { data, error } = await supabase
+        .from('team_members')
+        .insert([{
+          team_id: teamId,
+          profile_id: profileId,
+          role
+        }])
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Error adding team member:', error);
+        set({ error: error.message, isLoading: false });
+        return;
+      }
+      
+      // Add the new member to state
+      set(state => ({
+        teamMembers: [...state.teamMembers, data],
+        isLoading: false
+      }));
+    } catch (error: any) {
+      console.error('Error adding team member:', error);
+      set({ error: error.message, isLoading: false });
+    }
+  },
+
+  removeTeamMember: async (teamMemberId) => {
+    try {
+      set({ isLoading: true, error: null });
+      
+      const { error } = await supabase
+        .from('team_members')
+        .delete()
+        .eq('id', teamMemberId);
+
+      if (error) {
+        console.error('Error removing team member:', error);
+        set({ error: error.message, isLoading: false });
+        return;
+      }
+      
+      // Remove the member from state
+      set(state => ({
+        teamMembers: state.teamMembers.filter(member => member.id !== teamMemberId),
+        isLoading: false
+      }));
+    } catch (error: any) {
+      console.error('Error removing team member:', error);
       set({ error: error.message, isLoading: false });
     }
   },

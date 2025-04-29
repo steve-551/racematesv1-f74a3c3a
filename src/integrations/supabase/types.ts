@@ -173,6 +173,48 @@ export type Database = {
           },
         ]
       }
+      direct_messages: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          read_at: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient_id: string
+          sender_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          read_at?: string | null
+          recipient_id?: string
+          sender_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "direct_messages_recipient_id_fkey"
+            columns: ["recipient_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "direct_messages_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       driver_availability: {
         Row: {
           created_at: string
@@ -378,6 +420,48 @@ export type Database = {
           },
         ]
       }
+      friendships: {
+        Row: {
+          addressee_id: string
+          created_at: string
+          id: string
+          requestor_id: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          addressee_id: string
+          created_at?: string
+          id?: string
+          requestor_id: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          addressee_id?: string
+          created_at?: string
+          id?: string
+          requestor_id?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "friendships_addressee_id_fkey"
+            columns: ["addressee_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "friendships_requestor_id_fkey"
+            columns: ["requestor_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       iracing_ratings: {
         Row: {
           discipline: Database["public"]["Enums"]["discipline_type"]
@@ -412,6 +496,92 @@ export type Database = {
             columns: ["profile_id"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notice_board_posts: {
+        Row: {
+          author_id: string
+          category: string
+          content: string
+          created_at: string
+          expires_at: string | null
+          id: string
+          status: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          category: string
+          content: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          status?: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          category?: string
+          content?: string
+          created_at?: string
+          expires_at?: string | null
+          id?: string
+          status?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notice_board_posts_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notice_board_replies: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string
+          id: string
+          post_id: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string
+          id?: string
+          post_id: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          post_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notice_board_replies_author_id_fkey"
+            columns: ["author_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "notice_board_replies_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "notice_board_posts"
             referencedColumns: ["id"]
           },
         ]
@@ -700,6 +870,60 @@ export type Database = {
         }
         Relationships: []
       }
+      race_strategies: {
+        Row: {
+          created_at: string
+          description: string | null
+          event_id: string
+          fuel_strategy: string | null
+          id: string
+          pit_strategy: string | null
+          qualifying_strategy: string | null
+          team_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          event_id: string
+          fuel_strategy?: string | null
+          id?: string
+          pit_strategy?: string | null
+          qualifying_strategy?: string | null
+          team_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          event_id?: string
+          fuel_strategy?: string | null
+          id?: string
+          pit_strategy?: string | null
+          qualifying_strategy?: string | null
+          team_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "race_strategies_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "team_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "race_strategies_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       racer_matches: {
         Row: {
           created_at: string | null
@@ -829,6 +1053,44 @@ export type Database = {
           },
           {
             foreignKeyName: "setup_comments_setup_id_fkey"
+            columns: ["setup_id"]
+            isOneToOne: false
+            referencedRelation: "setups"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      setup_files: {
+        Row: {
+          created_at: string
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          id: string
+          setup_id: string
+        }
+        Insert: {
+          created_at?: string
+          file_name: string
+          file_path: string
+          file_size: number
+          file_type: string
+          id?: string
+          setup_id: string
+        }
+        Update: {
+          created_at?: string
+          file_name?: string
+          file_path?: string
+          file_size?: number
+          file_type?: string
+          id?: string
+          setup_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "setup_files_setup_id_fkey"
             columns: ["setup_id"]
             isOneToOne: false
             referencedRelation: "setups"
@@ -971,6 +1233,45 @@ export type Database = {
           },
         ]
       }
+      stint_schedules: {
+        Row: {
+          created_at: string
+          event_id: string
+          id: string
+          team_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          event_id: string
+          id?: string
+          team_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          event_id?: string
+          id?: string
+          team_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stint_schedules_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "team_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "stint_schedules_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       stints: {
         Row: {
           color: string | null
@@ -1022,6 +1323,99 @@ export type Database = {
           },
           {
             foreignKeyName: "stints_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_chats: {
+        Row: {
+          content: string
+          created_at: string
+          id: string
+          sender_id: string
+          team_id: string
+        }
+        Insert: {
+          content: string
+          created_at?: string
+          id?: string
+          sender_id: string
+          team_id: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          id?: string
+          sender_id?: string
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_chats_sender_id_fkey"
+            columns: ["sender_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_chats_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_events: {
+        Row: {
+          created_at: string
+          creator_id: string
+          description: string | null
+          end_time: string
+          event_type: string
+          id: string
+          start_time: string
+          team_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          creator_id: string
+          description?: string | null
+          end_time: string
+          event_type: string
+          id?: string
+          start_time: string
+          team_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          creator_id?: string
+          description?: string | null
+          end_time?: string
+          event_type?: string
+          id?: string
+          start_time?: string
+          team_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_events_creator_id_fkey"
+            columns: ["creator_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_events_team_id_fkey"
             columns: ["team_id"]
             isOneToOne: false
             referencedRelation: "teams"
@@ -1125,28 +1519,49 @@ export type Database = {
       }
       teams: {
         Row: {
+          achievements: string | null
           created_at: string
+          description: string | null
           id: string
+          is_public: boolean | null
           logo_url: string | null
           name: string
           owner_id: string
+          platforms: string[] | null
           updated_at: string
+          xp_level: number | null
+          xp_points: number | null
+          xp_tier: string | null
         }
         Insert: {
+          achievements?: string | null
           created_at?: string
+          description?: string | null
           id?: string
+          is_public?: boolean | null
           logo_url?: string | null
           name: string
           owner_id: string
+          platforms?: string[] | null
           updated_at?: string
+          xp_level?: number | null
+          xp_points?: number | null
+          xp_tier?: string | null
         }
         Update: {
+          achievements?: string | null
           created_at?: string
+          description?: string | null
           id?: string
+          is_public?: boolean | null
           logo_url?: string | null
           name?: string
           owner_id?: string
+          platforms?: string[] | null
           updated_at?: string
+          xp_level?: number | null
+          xp_points?: number | null
+          xp_tier?: string | null
         }
         Relationships: [
           {
