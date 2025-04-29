@@ -1,4 +1,3 @@
-
 import { create } from 'zustand';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -254,13 +253,7 @@ export const useMessagingStore = create<MessagingState>((set, get) => ({
       // Find all users that the current user has exchanged messages with
       const { data, error } = await supabase
         .from('direct_messages')
-        .select(`
-          distinct sender_id, recipient_id,
-          sender:sender_id(id, display_name, avatar_url),
-          recipient:recipient_id(id, display_name, avatar_url)
-        `)
-        .or(`sender_id.eq.${userId},recipient_id.eq.${userId}`)
-        .order('created_at', { ascending: false });
+        .select('sender_id, recipient_id');
       
       if (error) {
         console.error('Error fetching active conversations:', error);
@@ -272,8 +265,11 @@ export const useMessagingStore = create<MessagingState>((set, get) => ({
         // Extract unique conversation partners
         const uniqueConversations = new Set<string>();
         data.forEach(msg => {
-          const partnerId = msg.sender_id === userId ? msg.recipient_id : msg.sender_id;
-          uniqueConversations.add(partnerId);
+          if (msg.sender_id === userId) {
+            uniqueConversations.add(msg.recipient_id);
+          } else if (msg.recipient_id === userId) {
+            uniqueConversations.add(msg.sender_id);
+          }
         });
         
         set({ activeConversations: Array.from(uniqueConversations), isLoading: false });

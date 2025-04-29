@@ -92,8 +92,10 @@ const SetupVault = () => {
   
   const handleCreateSetup = async () => {
     try {
+      // Make sure we add owner_id
       const setupData = {
         ...setupForm,
+        owner_id: currentRacer?.id || '', // Add owner_id from the current racer
       };
       
       const createdSetup = await createSetup(setupData);

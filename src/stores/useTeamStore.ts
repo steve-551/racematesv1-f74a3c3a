@@ -14,7 +14,8 @@ export interface Team {
   achievements: string;
   created_at: string;
   updated_at: string;
-  platforms?: string[]; // Added this property
+  platforms?: string[];
+  owner_id?: string;
 }
 
 export interface TeamMember {
@@ -23,7 +24,7 @@ export interface TeamMember {
   profile_id: string;
   role: string;
   joined_at: string;
-  profile?: Racer; // Changed from RacerProfile to Racer
+  profile?: Racer;
 }
 
 export interface TeamEvent {
@@ -64,7 +65,6 @@ type TeamState = {
   leaveTeam: (teamId: string) => Promise<void>;
 };
 
-// Mock data for teams
 const MOCK_TEAMS: Team[] = [
   {
     id: '1',

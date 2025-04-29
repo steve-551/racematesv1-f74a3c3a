@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { useTeamStore } from '@/stores/useTeamStore';
@@ -72,7 +71,10 @@ const TeamDashboard = () => {
     }
   }, [id, fetchTeamById, fetchTeamMembers, fetchTeamEvents]);
   
-  const isTeamOwner = currentRacer?.id === currentTeam?.owner_id;
+  // Check if user is team owner by checking if they are a member with the role of 'owner'
+  const isTeamOwner = currentTeam && currentRacer && teamMembers.some(
+    member => member.profile_id === currentRacer.id && member.role === 'owner'
+  );
   
   const handleCreateEvent = async () => {
     if (!id || !eventTitle || !eventType || !eventDate || !eventStartTime || !eventEndTime) {

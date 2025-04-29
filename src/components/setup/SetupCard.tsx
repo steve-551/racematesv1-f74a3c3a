@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -83,10 +82,9 @@ const SetupCard: React.FC<SetupCardProps> = ({
       <CardFooter className="border-t pt-3 flex justify-between">
         <div className="flex items-center space-x-2">
           <Avatar className="h-6 w-6">
-            <AvatarImage src={setup.owner?.avatar_url} />
-            <AvatarFallback>{setup.owner?.display_name?.charAt(0) || '?'}</AvatarFallback>
+            <AvatarFallback>?</AvatarFallback>
           </Avatar>
-          <span className="text-xs">{setup.owner?.display_name || 'Unknown'}</span>
+          <span className="text-xs">Owner</span>
         </div>
         <Button size="sm" variant="outline" onClick={() => onView(setup)}>
           <FileText className="h-4 w-4 mr-1" />

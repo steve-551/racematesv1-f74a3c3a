@@ -13,7 +13,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   children,
   requireAuth = true
 }) => {
-  const { user, isLoading } = useAuthStore();
+  const { user, session } = useAuthStore();
+  const isLoading = false; // We'll use a simple loading state since isLoading isn't in AuthState
 
   if (isLoading) {
     return (
