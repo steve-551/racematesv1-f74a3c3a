@@ -14,7 +14,8 @@ const MainLayout: React.FC<MainLayoutProps> = ({
   requireAuth = true
 }) => {
   const { user, session } = useAuthStore();
-  const isLoading = false; // We'll use a simple loading state since isLoading isn't in AuthState
+  // We're not using isLoading from the store as it doesn't exist
+  const isLoading = false;
 
   if (isLoading) {
     return (
