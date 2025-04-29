@@ -1,7 +1,6 @@
-
 import React, { useEffect, useState } from 'react';
 import { useRacerStore } from '@/stores/useRacerStore';
-import AppLayout from '@/components/layout/AppLayout';
+import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -22,6 +21,7 @@ const MyRacerProfile: React.FC = () => {
   const { currentRacer, fetchCurrentRacerProfile, updateRacerProfile, toggleLookingForTeam, isLoading } = useRacerStore();
   const { isProfileLoading, userTeams } = useProfile();
   const [isEditing, setIsEditing] = useState(false);
+  const [activeTab, setActiveTab] = useState('profile');
   const [formData, setFormData] = useState({
     display_name: '',
     full_name: '',
@@ -154,26 +154,26 @@ const MyRacerProfile: React.FC = () => {
   
   if (isProfileLoading || isLoading) {
     return (
-      <AppLayout>
+      <MainLayout>
         <div className="container mx-auto px-4 py-16 text-center">
           <p className="text-lg">Loading profile...</p>
         </div>
-      </AppLayout>
+      </MainLayout>
     );
   }
   
   if (!currentRacer) {
     return (
-      <AppLayout>
+      <MainLayout>
         <div className="container mx-auto px-4 py-16 text-center">
           <p className="text-lg">No profile found. Please sign in or create an account.</p>
         </div>
-      </AppLayout>
+      </MainLayout>
     );
   }
 
   return (
-    <AppLayout>
+    <MainLayout>
       <div className="container mx-auto px-4 py-8">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-orbitron font-bold">My Racer Profile</h1>
@@ -195,7 +195,7 @@ const MyRacerProfile: React.FC = () => {
           </Button>
         </div>
         
-        <Tabs defaultValue="profile" className="w-full">
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="bg-racing-dark-alt mb-6">
             <TabsTrigger value="profile">Profile</TabsTrigger>
             <TabsTrigger value="stats">Racing Stats</TabsTrigger>
@@ -819,11 +819,10 @@ const MyRacerProfile: React.FC = () => {
           </TabsContent>
         </Tabs>
       </div>
-    </AppLayout>
+    </MainLayout>
   );
 };
 
-// Helper component to render stats for each discipline
 const StatsDisciplineContent: React.FC<{ stats: any }> = ({ stats }) => {
   if (!stats.irating && !stats.sr && !stats.licence) {
     return (
