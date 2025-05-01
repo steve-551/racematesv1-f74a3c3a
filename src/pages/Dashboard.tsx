@@ -256,7 +256,7 @@ const Dashboard = () => {
 
             {/* Quick Links Panel */}
             <Card className="bg-neutral-200">
-              <CardHeader className="pb-3">
+              <CardHeader className="pb-3 bg-racing-red">
                 <CardTitle>Quick Links</CardTitle>
               </CardHeader>
               <CardContent className="space-y-2">
