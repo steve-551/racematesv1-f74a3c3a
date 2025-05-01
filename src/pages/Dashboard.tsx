@@ -211,7 +211,7 @@ const Dashboard = () => {
           {/* Sidebar - Right Column */}
           <div className="space-y-6">
             {/* Quick Stats Panel */}
-            <Card>
+            <Card className="bg-neutral-200">
               <CardHeader className="pb-3">
                 <CardTitle>Racing Profile</CardTitle>
               </CardHeader>
@@ -255,7 +255,7 @@ const Dashboard = () => {
             </Card>
 
             {/* Quick Links Panel */}
-            <Card>
+            <Card className="bg-neutral-200">
               <CardHeader className="pb-3">
                 <CardTitle>Quick Links</CardTitle>
               </CardHeader>
@@ -288,7 +288,7 @@ const Dashboard = () => {
             </Card>
 
             {/* Recommended Racers Panel */}
-            <Card>
+            <Card className="bg-neutral-200">
               <CardHeader className="pb-3">
                 <CardTitle>Recommended Racers</CardTitle>
                 <CardDescription>People you might want to race with</CardDescription>
