@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -5,10 +6,12 @@ import { useProfile } from '@/components/providers/ProfileProvider';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
-import { LayoutDashboard, Users, Calendar, Settings, Menu, X, LogOut, User, FileText, MessageSquare, Home } from 'lucide-react';
+import { LayoutDashboard, Users, Calendar, Settings, Menu, X, LogOut, User, FileText, MessageSquare, Home, UserPlus } from 'lucide-react';
+
 interface SidebarProps {
   children: React.ReactNode;
 }
+
 export const Sidebar: React.FC<SidebarProps> = ({
   children
 }) => {
@@ -23,39 +26,55 @@ export const Sidebar: React.FC<SidebarProps> = ({
   } = useProfile();
   const toggleSidebar = () => setIsOpen(!isOpen);
   const closeSidebar = () => setIsOpen(false);
-  const navItems = [{
-    path: '/dashboard',
-    icon: <LayoutDashboard className="h-5 w-5" />,
-    label: 'Dashboard'
-  }, {
-    path: '/find-racers',
-    icon: <Users className="h-5 w-5" />,
-    label: 'Find Racers'
-  }, {
-    path: '/events',
-    icon: <Calendar className="h-5 w-5" />,
-    label: 'Events'
-  }, {
-    path: '/setups',
-    icon: <FileText className="h-5 w-5" />,
-    label: 'Setups'
-  }, {
-    path: '/stints',
-    icon: <Calendar className="h-5 w-5" />,
-    label: 'Stint Planner'
-  }, {
-    path: '/notice-board',
-    icon: <MessageSquare className="h-5 w-5" />,
-    label: 'Notice Board'
-  }, {
-    path: '/profile',
-    icon: <User className="h-5 w-5" />,
-    label: 'My Profile'
-  }];
+  
+  const navItems = [
+    {
+      path: '/dashboard',
+      icon: <LayoutDashboard className="h-5 w-5" />,
+      label: 'Dashboard'
+    }, 
+    {
+      path: '/find-racers',
+      icon: <Users className="h-5 w-5" />,
+      label: 'Find Racers'
+    }, 
+    {
+      path: '/events',
+      icon: <Calendar className="h-5 w-5" />,
+      label: 'Events'
+    },
+    {
+      path: '/teams',
+      icon: <UserPlus className="h-5 w-5" />,
+      label: 'Teams'
+    },
+    {
+      path: '/setups',
+      icon: <FileText className="h-5 w-5" />,
+      label: 'Setups'
+    }, 
+    {
+      path: '/stints',
+      icon: <Calendar className="h-5 w-5" />,
+      label: 'Stint Planner'
+    }, 
+    {
+      path: '/notice-board',
+      icon: <MessageSquare className="h-5 w-5" />,
+      label: 'Notice Board'
+    }, 
+    {
+      path: '/profile',
+      icon: <User className="h-5 w-5" />,
+      label: 'My Profile'
+    }
+  ];
+  
   const handleSignOut = async () => {
     await signOut();
     window.location.href = '/';
   };
+  
   return <div className="flex min-h-screen">
       {/* Mobile Overlay */}
       {isOpen && <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={closeSidebar} />}
@@ -130,4 +149,5 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
     </div>;
 };
+
 export default Sidebar;

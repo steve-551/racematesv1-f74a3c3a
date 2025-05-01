@@ -4,6 +4,7 @@ import { useAuthStore } from '@/stores/useAuthStore';
 import { useRacerStore } from '@/stores/useRacerStore';
 import { useTeamStore } from '@/stores/useTeamStore';
 import { Team } from '@/stores/useTeamStore';
+import { toast } from 'sonner';
 
 interface ProfileContextType {
   isProfileLoading: boolean;
@@ -36,8 +37,13 @@ export const ProfileProvider = ({ children }: { children: React.ReactNode }) => 
   useEffect(() => {
     if (user && !hasAttemptedProfileFetch) {
       const fetchProfile = async () => {
-        await fetchCurrentRacerProfile();
-        setHasAttemptedProfileFetch(true);
+        try {
+          await fetchCurrentRacerProfile();
+          setHasAttemptedProfileFetch(true);
+        } catch (error) {
+          console.error("Failed to fetch racer profile:", error);
+          toast.error("Failed to load your profile data");
+        }
       };
       
       fetchProfile();
@@ -49,8 +55,13 @@ export const ProfileProvider = ({ children }: { children: React.ReactNode }) => 
   useEffect(() => {
     if (user && !hasAttemptedTeamsFetch) {
       const fetchUserTeams = async () => {
-        await fetchTeams();
-        setHasAttemptedTeamsFetch(true);
+        try {
+          await fetchTeams();
+          setHasAttemptedTeamsFetch(true);
+        } catch (error) {
+          console.error("Failed to fetch teams:", error);
+          toast.error("Failed to load your teams data");
+        }
       };
       
       fetchUserTeams();
@@ -70,7 +81,12 @@ export const ProfileProvider = ({ children }: { children: React.ReactNode }) => 
   
   const refreshUserTeams = async () => {
     if (user) {
-      await fetchTeams();
+      try {
+        await fetchTeams();
+      } catch (error) {
+        console.error("Failed to refresh teams:", error);
+        toast.error("Failed to refresh your teams data");
+      }
     }
   };
 

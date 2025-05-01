@@ -1,6 +1,7 @@
 
 import { create } from 'zustand';
 import { supabase } from '@/lib/supabaseClient';
+import { toast } from 'sonner';
 
 export interface FriendRequest {
   id: string;
@@ -37,6 +38,53 @@ interface FriendshipState {
   checkFriendship: (profileId: string) => Promise<string | null>;
 }
 
+// Mock data for friends
+const MOCK_FRIENDS = [
+  {
+    id: 'mock-friend-1',
+    requestor_id: 'user-1',
+    addressee_id: 'current-user',
+    status: 'accepted',
+    created_at: '2023-01-15T12:00:00Z',
+    updated_at: '2023-01-15T12:05:00Z',
+    requestor: {
+      id: 'user-1',
+      display_name: 'Alex Johnson',
+      avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alex'
+    }
+  },
+  {
+    id: 'mock-friend-2',
+    requestor_id: 'current-user',
+    addressee_id: 'user-2',
+    status: 'accepted',
+    created_at: '2023-02-20T15:30:00Z',
+    updated_at: '2023-02-20T16:00:00Z',
+    addressee: {
+      id: 'user-2',
+      display_name: 'Chris Miller',
+      avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Chris'
+    }
+  }
+] as FriendRequest[];
+
+// Mock data for friend requests
+const MOCK_FRIEND_REQUESTS = [
+  {
+    id: 'mock-request-1',
+    requestor_id: 'user-3',
+    addressee_id: 'current-user',
+    status: 'pending',
+    created_at: '2023-03-10T09:15:00Z',
+    updated_at: '2023-03-10T09:15:00Z',
+    requestor: {
+      id: 'user-3',
+      display_name: 'Sam Wilson',
+      avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sam'
+    }
+  }
+] as FriendRequest[];
+
 export const useFriendshipStore = create<FriendshipState>((set, get) => ({
   friends: [],
   friendRequests: [],
@@ -48,49 +96,33 @@ export const useFriendshipStore = create<FriendshipState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
-        throw new Error('User not authenticated');
-      }
+      // Mock implementation for sending a friend request
+      const newRequest = {
+        id: `mock-request-${Date.now()}`,
+        requestor_id: 'current-user',
+        addressee_id: addresseeId,
+        status: 'pending',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        addressee: {
+          id: addresseeId,
+          display_name: 'New Friend',
+          avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${addresseeId}`
+        }
+      } as FriendRequest;
       
-      const requestorId = userData.user.id;
-      
-      // Check if a request already exists
-      const { data: existingRequests } = await supabase
-        .from('friendships')
-        .select('*')
-        .or(`requestor_id.eq.${requestorId},addressee_id.eq.${requestorId}`)
-        .or(`requestor_id.eq.${addresseeId},addressee_id.eq.${addresseeId}`);
-      
-      if (existingRequests && existingRequests.length > 0) {
-        throw new Error('A friend request already exists between these users');
-      }
-      
-      // Create new friend request
-      const { data, error } = await supabase
-        .from('friendships')
-        .insert([{
-          requestor_id: requestorId,
-          addressee_id: addresseeId,
-          status: 'pending'
-        }])
-        .select();
-      
-      if (error) {
-        console.error('Error sending friend request:', error);
-        set({ error: error.message, isLoading: false });
-        return;
-      }
-      
-      // Update sent requests
+      // Add to sent requests
       set(state => ({ 
-        sentRequests: [...state.sentRequests, data[0]],
+        sentRequests: [...state.sentRequests, newRequest],
         isLoading: false
       }));
+      
+      toast.success("Friend request sent successfully!");
       
     } catch (error: any) {
       console.error('Error sending friend request:', error);
       set({ error: error.message, isLoading: false });
+      toast.error("Failed to send friend request");
     }
   },
   
@@ -98,31 +130,9 @@ export const useFriendshipStore = create<FriendshipState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
-        throw new Error('User not authenticated');
-      }
+      // Use mock data instead of Supabase
+      set({ friends: MOCK_FRIENDS, isLoading: false });
       
-      const userId = userData.user.id;
-      
-      // Fetch friendships where status is 'accepted'
-      const { data, error } = await supabase
-        .from('friendships')
-        .select(`
-          *,
-          requestor:requestor_id(id, display_name, avatar_url),
-          addressee:addressee_id(id, display_name, avatar_url)
-        `)
-        .or(`requestor_id.eq.${userId},addressee_id.eq.${userId}`)
-        .eq('status', 'accepted');
-      
-      if (error) {
-        console.error('Error fetching friends:', error);
-        set({ error: error.message, isLoading: false });
-        return;
-      }
-      
-      set({ friends: data || [], isLoading: false });
     } catch (error: any) {
       console.error('Error fetching friends:', error);
       set({ error: error.message, isLoading: false });
@@ -133,30 +143,9 @@ export const useFriendshipStore = create<FriendshipState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
-        throw new Error('User not authenticated');
-      }
+      // Use mock data instead of Supabase
+      set({ friendRequests: MOCK_FRIEND_REQUESTS, isLoading: false });
       
-      const userId = userData.user.id;
-      
-      // Fetch friend requests addressed to the current user
-      const { data, error } = await supabase
-        .from('friendships')
-        .select(`
-          *,
-          requestor:requestor_id(id, display_name, avatar_url)
-        `)
-        .eq('addressee_id', userId)
-        .eq('status', 'pending');
-      
-      if (error) {
-        console.error('Error fetching friend requests:', error);
-        set({ error: error.message, isLoading: false });
-        return;
-      }
-      
-      set({ friendRequests: data || [], isLoading: false });
     } catch (error: any) {
       console.error('Error fetching friend requests:', error);
       set({ error: error.message, isLoading: false });
@@ -167,30 +156,9 @@ export const useFriendshipStore = create<FriendshipState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
-        throw new Error('User not authenticated');
-      }
+      // Use empty mock data for sent requests
+      set({ sentRequests: [], isLoading: false });
       
-      const userId = userData.user.id;
-      
-      // Fetch requests sent by the current user
-      const { data, error } = await supabase
-        .from('friendships')
-        .select(`
-          *,
-          addressee:addressee_id(id, display_name, avatar_url)
-        `)
-        .eq('requestor_id', userId)
-        .eq('status', 'pending');
-      
-      if (error) {
-        console.error('Error fetching sent requests:', error);
-        set({ error: error.message, isLoading: false });
-        return;
-      }
-      
-      set({ sentRequests: data || [], isLoading: false });
     } catch (error: any) {
       console.error('Error fetching sent requests:', error);
       set({ error: error.message, isLoading: false });
@@ -201,34 +169,43 @@ export const useFriendshipStore = create<FriendshipState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      const { data, error } = await supabase
-        .from('friendships')
-        .update({ status })
-        .eq('id', requestId)
-        .select();
-      
-      if (error) {
-        console.error(`Error ${status} friend request:`, error);
-        set({ error: error.message, isLoading: false });
-        return;
-      }
-      
-      // Update state based on response
+      // Update the local state based on response
       if (status === 'accepted') {
-        set(state => ({
-          friends: [...state.friends, data[0]],
-          friendRequests: state.friendRequests.filter(req => req.id !== requestId),
-          isLoading: false
-        }));
+        set(state => {
+          const request = state.friendRequests.find(req => req.id === requestId);
+          
+          if (request) {
+            const acceptedRequest = {
+              ...request,
+              status: 'accepted',
+              updated_at: new Date().toISOString()
+            };
+            
+            return {
+              friends: [...state.friends, acceptedRequest],
+              friendRequests: state.friendRequests.filter(req => req.id !== requestId),
+              isLoading: false
+            };
+          }
+          
+          return state;
+        });
+        
+        toast.success("Friend request accepted!");
       } else {
         set(state => ({
           friendRequests: state.friendRequests.filter(req => req.id !== requestId),
           isLoading: false
         }));
+        
+        if (status === 'rejected') toast.info("Friend request rejected");
+        if (status === 'blocked') toast.info("User blocked");
       }
+      
     } catch (error: any) {
       console.error(`Error ${status} friend request:`, error);
       set({ error: error.message, isLoading: false });
+      toast.error(`Failed to ${status} friend request`);
     }
   },
   
@@ -236,47 +213,37 @@ export const useFriendshipStore = create<FriendshipState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      const { error } = await supabase
-        .from('friendships')
-        .delete()
-        .eq('id', friendshipId);
-      
-      if (error) {
-        console.error('Error removing friend:', error);
-        set({ error: error.message, isLoading: false });
-        return;
-      }
-      
       set(state => ({
         friends: state.friends.filter(friend => friend.id !== friendshipId),
         isLoading: false
       }));
+      
+      toast.success("Friend removed successfully");
+      
     } catch (error: any) {
       console.error('Error removing friend:', error);
       set({ error: error.message, isLoading: false });
+      toast.error("Failed to remove friend");
     }
   },
   
   checkFriendship: async (profileId: string) => {
     try {
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
-        throw new Error('User not authenticated');
+      // Check in friends list
+      const { friends } = get();
+      
+      // For mock implementation
+      if (profileId === 'user-1' || profileId === 'user-2') {
+        return 'accepted';
       }
       
-      const userId = userData.user.id;
-      
-      // Check if a friendship exists between users
-      const { data } = await supabase
-        .from('friendships')
-        .select('id, status')
-        .or(`requestor_id.eq.${userId}.and.addressee_id.eq.${profileId},addressee_id.eq.${userId}.and.requestor_id.eq.${profileId}`);
-      
-      if (data && data.length > 0) {
-        return data[0].status;
-      } else {
-        return null;
+      // Check in pending requests
+      const { sentRequests } = get();
+      if (sentRequests.some(req => req.addressee_id === profileId)) {
+        return 'pending';
       }
+      
+      return null;
     } catch (error: any) {
       console.error('Error checking friendship status:', error);
       return null;

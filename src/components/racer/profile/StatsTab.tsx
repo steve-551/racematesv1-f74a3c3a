@@ -18,6 +18,13 @@ const StatsDisciplineContent: React.FC<StatsDisciplineContentProps> = ({ stats }
     );
   }
   
+  // Helper function to safely format numeric values
+  const safeFormat = (value: any, places: number = 2) => {
+    if (value === null || value === undefined) return '-';
+    if (typeof value === 'number') return value.toFixed(places);
+    return String(value);
+  };
+  
   return (
     <div className="space-y-6">
       <div className="bg-gray-800 p-4 rounded-lg">
@@ -35,7 +42,7 @@ const StatsDisciplineContent: React.FC<StatsDisciplineContentProps> = ({ stats }
           </div>
           <div>
             <p className="text-xs text-gray-400">Safety Rating</p>
-            <p className="text-2xl font-bold">{stats?.sr ? stats.sr.toFixed(2) : '-'}</p>
+            <p className="text-2xl font-bold">{safeFormat(stats?.sr)}</p>
           </div>
           <div>
             <p className="text-xs text-gray-400">Time Trial Rating</p>
@@ -62,13 +69,13 @@ const StatsDisciplineContent: React.FC<StatsDisciplineContentProps> = ({ stats }
           </div>
           <div>
             <p className="text-xs text-gray-400">Avg. Finish</p>
-            <p className="text-2xl font-bold">{stats?.avg_finish ? stats.avg_finish.toFixed(1) : '-'}</p>
+            <p className="text-2xl font-bold">{safeFormat(stats?.avg_finish, 1)}</p>
           </div>
         </div>
         
         {stats?.wins && stats?.starts && (
           <div className="mt-4">
-            <p className="text-sm text-gray-400">Win Rate: {((stats.wins / stats.starts) * 100).toFixed(1)}%</p>
+            <p className="text-sm text-gray-400">Win Rate: {safeFormat((stats.wins / stats.starts) * 100, 1)}%</p>
             <div className="h-2 bg-gray-700 rounded-full mt-1">
               <div 
                 className="h-full bg-green-500 rounded-full" 

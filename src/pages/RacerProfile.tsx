@@ -15,6 +15,9 @@ import PlatformBadge from '@/components/racer/PlatformBadge';
 import LicenseClassBadge from '@/components/racer/LicenseClassBadge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { toast } from 'sonner';
+import { useMessagingStore } from '@/stores/useMessagingStore';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Textarea } from '@/components/ui/textarea';
 
 const RacerProfile: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -31,9 +34,14 @@ const RacerProfile: React.FC = () => {
     isLoading: isFriendshipLoading
   } = useFriendshipStore();
   
+  const { sendDirectMessage } = useMessagingStore();
+  
   const [loadingProfile, setLoadingProfile] = useState(true);
   const [friendshipStatus, setFriendshipStatus] = useState<string | null>(null);
   const [isSendingRequest, setIsSendingRequest] = useState(false);
+  const [isMessageDialogOpen, setIsMessageDialogOpen] = useState(false);
+  const [messageContent, setMessageContent] = useState('');
+  const [isSendingMessage, setIsSendingMessage] = useState(false);
 
   useEffect(() => {
     async function loadProfileAndFriendship() {
@@ -71,6 +79,30 @@ const RacerProfile: React.FC = () => {
     }
   };
 
+  const handleSendMessage = async () => {
+    if (!id || !messageContent.trim()) {
+      toast.error('Please enter a message');
+      return;
+    }
+
+    try {
+      setIsSendingMessage(true);
+      await sendDirectMessage(id, messageContent);
+      toast.success('Message sent!');
+      setMessageContent('');
+      setIsMessageDialogOpen(false);
+    } catch (error: any) {
+      console.error('Error sending message:', error);
+      toast.error('Failed to send message');
+    } finally {
+      setIsSendingMessage(false);
+    }
+  };
+
+  const handleTeamInvite = () => {
+    toast.info('Team invite functionality will be implemented soon!');
+  };
+
   const isProfileLoading = isLoading || loadingProfile;
 
   if (error) {
@@ -97,7 +129,10 @@ const RacerProfile: React.FC = () => {
   const renderFriendshipButton = () => {
     if (friendshipStatus === 'accepted') {
       return (
-        <Button className="racing-btn">
+        <Button 
+          className="racing-btn"
+          onClick={() => setIsMessageDialogOpen(true)}
+        >
           <MessageSquare size={16} className="mr-1" /> Message
         </Button>
       );
@@ -246,9 +281,11 @@ const RacerProfile: React.FC = () => {
 
                     <div className="mt-4 grid grid-cols-2 gap-2">
                       {renderFriendshipButton()}
-                      <Button variant="outline"><MessageSquare size={16} className="mr-1" /> Message</Button>
+                      <Button variant="outline" onClick={() => setIsMessageDialogOpen(true)}>
+                        <MessageSquare size={16} className="mr-1" /> Message
+                      </Button>
                       {currentRacer.looking_for_team && (
-                        <Button variant="outline" className="col-span-2">
+                        <Button variant="outline" className="col-span-2" onClick={handleTeamInvite}>
                           <Users size={16} className="mr-1" /> Invite to Team
                         </Button>
                       )}
@@ -266,7 +303,7 @@ const RacerProfile: React.FC = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   {disciplines.map(({ key, label }) => {
-                    const stats = currentRacer.statsByDiscipline[key as keyof typeof currentRacer.statsByDiscipline];
+                    const stats = currentRacer.statsByDiscipline?.[key as keyof typeof currentRacer.statsByDiscipline];
                     if (!stats) return null;
 
                     // Skip disciplines with no stats
@@ -290,7 +327,9 @@ const RacerProfile: React.FC = () => {
                           </div>
                           <div>
                             <p className="text-xs text-gray-400">Safety Rating</p>
-                            <p className="text-xl font-bold">{typeof stats.sr === 'number' ? stats.sr.toFixed(2) : '-'}</p>
+                            <p className="text-xl font-bold">
+                              {typeof stats.sr === 'number' ? stats.sr.toFixed(2) : '-'}
+                            </p>
                           </div>
                           <div>
                             <p className="text-xs text-gray-400">License</p>
@@ -306,7 +345,7 @@ const RacerProfile: React.FC = () => {
                   })}
                   
                   {!disciplines.some(({ key }) => {
-                    const stats = currentRacer.statsByDiscipline[key as keyof typeof currentRacer.statsByDiscipline];
+                    const stats = currentRacer.statsByDiscipline?.[key as keyof typeof currentRacer.statsByDiscipline];
                     if (!stats) return false;
                     return stats.irating !== null || stats.sr !== null || 
                            stats.licence !== null || stats.tt !== null;
@@ -318,6 +357,35 @@ const RacerProfile: React.FC = () => {
             </div>
           </div>
         )}
+
+        {/* Message Dialog */}
+        <Dialog open={isMessageDialogOpen} onOpenChange={setIsMessageDialogOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Send message to {currentRacer?.display_name}</DialogTitle>
+            </DialogHeader>
+            <div className="space-y-4 py-4">
+              <Textarea
+                placeholder="Type your message here..."
+                value={messageContent}
+                onChange={(e) => setMessageContent(e.target.value)}
+                rows={5}
+                className="resize-none"
+              />
+            </div>
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setIsMessageDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSendMessage}
+                disabled={isSendingMessage || !messageContent.trim()}
+              >
+                {isSendingMessage ? 'Sending...' : 'Send Message'}
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
       </div>
     </MainLayout>
   );

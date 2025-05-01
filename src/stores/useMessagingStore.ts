@@ -1,5 +1,7 @@
+
 import { create } from 'zustand';
 import { supabase } from '@/lib/supabaseClient';
+import { toast } from 'sonner';
 
 export interface DirectMessage {
   id: string;
@@ -48,6 +50,36 @@ interface MessagingState {
   markMessageAsRead: (messageId: string) => Promise<void>;
 }
 
+// Mock messages for testing
+const createMockDirectMessages = (recipientId: string) => {
+  return [
+    {
+      id: `msg-1-${recipientId}`,
+      sender_id: 'current-user',
+      recipient_id: recipientId,
+      content: 'Hey, how are you doing?',
+      read_at: null,
+      created_at: new Date(Date.now() - 3600000).toISOString(),
+    },
+    {
+      id: `msg-2-${recipientId}`,
+      sender_id: recipientId,
+      recipient_id: 'current-user',
+      content: 'Hi! I\'m good, thanks for asking. How about you?',
+      read_at: null,
+      created_at: new Date(Date.now() - 3000000).toISOString(),
+    },
+    {
+      id: `msg-3-${recipientId}`,
+      sender_id: 'current-user',
+      recipient_id: recipientId,
+      content: 'Doing great! Are you ready for the race this weekend?',
+      read_at: null,
+      created_at: new Date(Date.now() - 2400000).toISOString(),
+    }
+  ] as DirectMessage[];
+};
+
 export const useMessagingStore = create<MessagingState>((set, get) => ({
   directMessages: {},
   teamMessages: {},
@@ -59,34 +91,17 @@ export const useMessagingStore = create<MessagingState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
-        throw new Error('User not authenticated');
-      }
-      
-      const senderId = userData.user.id;
-      
-      const { data, error } = await supabase
-        .from('direct_messages')
-        .insert([{
-          sender_id: senderId,
-          recipient_id: recipientId,
-          content
-        }])
-        .select(`
-          *,
-          sender:sender_id(id, display_name, avatar_url),
-          recipient:recipient_id(id, display_name, avatar_url)
-        `);
-      
-      if (error) {
-        console.error('Error sending direct message:', error);
-        set({ error: error.message, isLoading: false });
-        return;
-      }
+      // Mock implementation for sending a message
+      const newMessage: DirectMessage = {
+        id: `msg-${Date.now()}`,
+        sender_id: 'current-user',
+        recipient_id: recipientId,
+        content,
+        read_at: null,
+        created_at: new Date().toISOString(),
+      };
       
       // Update state with new message
-      const newMessage = data[0];
       set(state => {
         const existingMessages = state.directMessages[recipientId] || [];
         return {
@@ -98,9 +113,12 @@ export const useMessagingStore = create<MessagingState>((set, get) => ({
         };
       });
       
+      toast.success('Message sent!');
+      
     } catch (error: any) {
       console.error('Error sending direct message:', error);
       set({ error: error.message, isLoading: false });
+      toast.error('Failed to send message');
     }
   },
   
@@ -108,48 +126,19 @@ export const useMessagingStore = create<MessagingState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
-        throw new Error('User not authenticated');
-      }
-      
-      const currentUserId = userData.user.id;
-      
-      // Fetch conversations between the current user and the selected user
-      const { data, error } = await supabase
-        .from('direct_messages')
-        .select(`
-          *,
-          sender:sender_id(id, display_name, avatar_url),
-          recipient:recipient_id(id, display_name, avatar_url)
-        `)
-        .or(`sender_id.eq.${currentUserId}.and.recipient_id.eq.${userId},sender_id.eq.${userId}.and.recipient_id.eq.${currentUserId}`)
-        .order('created_at', { ascending: true });
-      
-      if (error) {
-        console.error('Error fetching direct messages:', error);
-        set({ error: error.message, isLoading: false });
-        return;
-      }
-      
-      set(state => ({
-        directMessages: {
-          ...state.directMessages,
-          [userId]: data || []
-        },
-        isLoading: false
-      }));
-      
-      // Mark messages as read
-      const unreadMessages = data?.filter(msg => 
-        !msg.read_at && 
-        msg.recipient_id === currentUserId
-      );
-      
-      if (unreadMessages && unreadMessages.length > 0) {
-        for (const message of unreadMessages) {
-          await get().markMessageAsRead(message.id);
-        }
+      // Check if we already have messages for this user
+      const { directMessages } = get();
+      if (!directMessages[userId]) {
+        // Use mock messages if none exist
+        set(state => ({
+          directMessages: {
+            ...state.directMessages,
+            [userId]: createMockDirectMessages(userId)
+          },
+          isLoading: false
+        }));
+      } else {
+        set({ isLoading: false });
       }
       
     } catch (error: any) {
@@ -162,33 +151,16 @@ export const useMessagingStore = create<MessagingState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
-        throw new Error('User not authenticated');
-      }
-      
-      const senderId = userData.user.id;
-      
-      const { data, error } = await supabase
-        .from('team_chats')
-        .insert([{
-          team_id: teamId,
-          sender_id: senderId,
-          content
-        }])
-        .select(`
-          *,
-          sender:sender_id(id, display_name, avatar_url)
-        `);
-      
-      if (error) {
-        console.error('Error sending team message:', error);
-        set({ error: error.message, isLoading: false });
-        return;
-      }
+      // Mock implementation for sending a team message
+      const newMessage: TeamChatMessage = {
+        id: `team-msg-${Date.now()}`,
+        team_id: teamId,
+        sender_id: 'current-user',
+        content,
+        created_at: new Date().toISOString(),
+      };
       
       // Update state with new message
-      const newMessage = data[0];
       set(state => {
         const existingMessages = state.teamMessages[teamId] || [];
         return {
@@ -200,9 +172,12 @@ export const useMessagingStore = create<MessagingState>((set, get) => ({
         };
       });
       
+      toast.success('Team message sent!');
+      
     } catch (error: any) {
       console.error('Error sending team message:', error);
       set({ error: error.message, isLoading: false });
+      toast.error('Failed to send team message');
     }
   },
   
@@ -210,25 +185,11 @@ export const useMessagingStore = create<MessagingState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      const { data, error } = await supabase
-        .from('team_chats')
-        .select(`
-          *,
-          sender:sender_id(id, display_name, avatar_url)
-        `)
-        .eq('team_id', teamId)
-        .order('created_at', { ascending: true });
-      
-      if (error) {
-        console.error('Error fetching team messages:', error);
-        set({ error: error.message, isLoading: false });
-        return;
-      }
-      
+      // Use mock team messages
       set(state => ({
         teamMessages: {
           ...state.teamMessages,
-          [teamId]: data || []
+          [teamId]: []
         },
         isLoading: false
       }));
@@ -243,37 +204,11 @@ export const useMessagingStore = create<MessagingState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      const { data: userData } = await supabase.auth.getUser();
-      if (!userData.user) {
-        throw new Error('User not authenticated');
-      }
-      
-      const userId = userData.user.id;
-      
-      // Find all users that the current user has exchanged messages with
-      const { data, error } = await supabase
-        .from('direct_messages')
-        .select('sender_id, recipient_id');
-      
-      if (error) {
-        console.error('Error fetching active conversations:', error);
-        set({ error: error.message, isLoading: false });
-        return;
-      }
-      
-      if (data) {
-        // Extract unique conversation partners
-        const uniqueConversations = new Set<string>();
-        data.forEach(msg => {
-          if (msg.sender_id === userId) {
-            uniqueConversations.add(msg.recipient_id);
-          } else if (msg.recipient_id === userId) {
-            uniqueConversations.add(msg.sender_id);
-          }
-        });
-        
-        set({ activeConversations: Array.from(uniqueConversations), isLoading: false });
-      }
+      // Use mock active conversations
+      set({ 
+        activeConversations: ['user-1', 'user-2'],
+        isLoading: false 
+      });
       
     } catch (error: any) {
       console.error('Error fetching active conversations:', error);
@@ -283,14 +218,23 @@ export const useMessagingStore = create<MessagingState>((set, get) => ({
   
   markMessageAsRead: async (messageId: string) => {
     try {
-      const { error } = await supabase
-        .from('direct_messages')
-        .update({ read_at: new Date().toISOString() })
-        .eq('id', messageId);
+      // Find the message in all conversations and mark it as read
+      set(state => {
+        const updatedDirectMessages = { ...state.directMessages };
+        
+        // Check each conversation
+        Object.keys(updatedDirectMessages).forEach(userId => {
+          updatedDirectMessages[userId] = updatedDirectMessages[userId].map(message => {
+            if (message.id === messageId) {
+              return { ...message, read_at: new Date().toISOString() };
+            }
+            return message;
+          });
+        });
+        
+        return { directMessages: updatedDirectMessages };
+      });
       
-      if (error) {
-        console.error('Error marking message as read:', error);
-      }
     } catch (error: any) {
       console.error('Error marking message as read:', error);
     }

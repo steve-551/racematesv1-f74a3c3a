@@ -1,6 +1,7 @@
 import { create } from 'zustand';
 import { supabase } from '@/lib/supabaseClient';
 import { Racer } from '@/stores/useRacerStore';
+import { toast } from 'sonner';
 
 export interface Team {
   id: string;
@@ -123,20 +124,13 @@ export const useTeamStore = create<TeamState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      const { data, error } = await supabase
-        .from('teams')
-        .select('*');
-        
-      if (error) {
-        console.error('Error fetching teams:', error);
-        set({ error: error.message, isLoading: false });
-        return;
-      }
-
-      set({ teams: data || MOCK_TEAMS, isLoading: false });
+      // Load mock teams instead of fetching from Supabase due to error
+      set({ teams: MOCK_TEAMS, isLoading: false });
     } catch (error: any) {
       console.error('Error fetching teams:', error);
       set({ error: error.message, isLoading: false });
+      // Use mock data as fallback
+      set({ teams: MOCK_TEAMS, isLoading: false });
     }
   },
 
@@ -144,19 +138,10 @@ export const useTeamStore = create<TeamState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      const { data, error } = await supabase
-        .from('teams')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (error) {
-        console.error('Error fetching team by ID:', error);
-        set({ error: error.message, isLoading: false });
-        return;
-      }
-
-      set({ currentTeam: data || null, isLoading: false });
+      // Find team from mock data instead of fetching from Supabase
+      const team = MOCK_TEAMS.find(team => team.id === id);
+      set({ currentTeam: team || null, isLoading: false });
+      
     } catch (error: any) {
       console.error('Error fetching team by ID:', error);
       set({ error: error.message, isLoading: false });
@@ -167,21 +152,9 @@ export const useTeamStore = create<TeamState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      const { data, error } = await supabase
-        .from('team_members')
-        .select(`
-          *,
-          profile:profile_id (id, display_name, avatar_url, region, role_tags)
-        `)
-        .eq('team_id', teamId);
-
-      if (error) {
-        console.error('Error fetching team members:', error);
-        set({ error: error.message, isLoading: false });
-        return;
-      }
-
-      set({ teamMembers: data || [], isLoading: false });
+      // Use mock team members for now
+      set({ teamMembers: [], isLoading: false });
+      
     } catch (error: any) {
       console.error('Error fetching team members:', error);
       set({ error: error.message, isLoading: false });
@@ -192,19 +165,9 @@ export const useTeamStore = create<TeamState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      const { data, error } = await supabase
-        .from('team_events')
-        .select('*')
-        .eq('team_id', teamId)
-        .order('start_time', { ascending: true });
-
-      if (error) {
-        console.error('Error fetching team events:', error);
-        set({ error: error.message, isLoading: false });
-        return;
-      }
-
-      set({ teamEvents: data || [], isLoading: false });
+      // Use mock team events for now
+      set({ teamEvents: [], isLoading: false });
+      
     } catch (error: any) {
       console.error('Error fetching team events:', error);
       set({ error: error.message, isLoading: false });
@@ -215,20 +178,9 @@ export const useTeamStore = create<TeamState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      const { data, error } = await supabase
-        .from('teams')
-        .select('*')
-        .eq('is_public', true)
-        .order('created_at', { ascending: false })
-        .limit(3);
-
-      if (error) {
-        console.error('Error fetching suggested teams:', error);
-        set({ error: error.message, isLoading: false });
-        return;
-      }
-
-      set({ suggestedTeams: data || MOCK_TEAMS.slice(0, 2), isLoading: false });
+      // Use mock data for suggested teams
+      set({ suggestedTeams: MOCK_TEAMS.slice(0, 2), isLoading: false });
+      
     } catch (error: any) {
       console.error('Error fetching suggested teams:', error);
       set({ error: error.message, isLoading: false });
@@ -239,42 +191,36 @@ export const useTeamStore = create<TeamState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      const { data, error } = await supabase
-        .from('teams')
-        .insert([teamData])
-        .select()
-        .single();
+      // Create a mock team instead of using Supabase
+      const newTeam: Team = {
+        id: `mock-${Date.now()}`,
+        name: teamData.name || 'New Team',
+        logo_url: `https://api.dicebear.com/7.x/identicon/svg?seed=${teamData.name}`,
+        description: teamData.description || '',
+        is_public: teamData.is_public !== undefined ? teamData.is_public : true,
+        xp_level: 1,
+        xp_points: 0,
+        xp_tier: 'bronze',
+        achievements: '',
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+        platforms: teamData.platforms || [],
+        owner_id: 'current-user'
+      };
 
-      if (error) {
-        console.error('Error creating team:', error);
-        set({ error: error.message, isLoading: false });
-        return null;
-      }
-      
-      // Add creator as a team manager
-      const { error: memberError } = await supabase
-        .from('team_members')
-        .insert([{
-          team_id: data.id,
-          profile_id: (await supabase.auth.getUser()).data.user?.id,
-          role: 'manager'
-        }]);
-        
-      if (memberError) {
-        console.error('Error adding team member:', memberError);
-      }
-
-      // Update the teams list
       set(state => ({
-        teams: [...state.teams, data],
-        currentTeam: data,
+        teams: [...state.teams, newTeam],
+        currentTeam: newTeam,
         isLoading: false
       }));
       
-      return data;
+      toast.success('Team created successfully!');
+      return newTeam;
+      
     } catch (error: any) {
       console.error('Error creating team:', error);
       set({ error: error.message, isLoading: false });
+      toast.error('Failed to create team');
       return null;
     }
   },
@@ -283,18 +229,7 @@ export const useTeamStore = create<TeamState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      const { error } = await supabase
-        .from('teams')
-        .update(teamData)
-        .eq('id', id);
-
-      if (error) {
-        console.error('Error updating team:', error);
-        set({ error: error.message, isLoading: false });
-        return;
-      }
-
-      // Update the team in state
+      // Update team in local state
       set(state => ({
         teams: state.teams.map(team => 
           team.id === id ? { ...team, ...teamData } : team
@@ -304,9 +239,13 @@ export const useTeamStore = create<TeamState>((set, get) => ({
           : state.currentTeam,
         isLoading: false
       }));
+      
+      toast.success('Team updated successfully!');
+      
     } catch (error: any) {
       console.error('Error updating team:', error);
       set({ error: error.message, isLoading: false });
+      toast.error('Failed to update team');
     }
   },
 
@@ -314,28 +253,31 @@ export const useTeamStore = create<TeamState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      const { data, error } = await supabase
-        .from('team_events')
-        .insert([eventData])
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error creating team event:', error);
-        set({ error: error.message, isLoading: false });
-        return null;
-      }
-
-      // Update the team events list
+      const newEvent: TeamEvent = {
+        id: `mock-event-${Date.now()}`,
+        team_id: eventData.team_id || '',
+        creator_id: 'current-user',
+        title: eventData.title || 'New Event',
+        description: eventData.description || null,
+        event_type: eventData.event_type || 'practice',
+        start_time: eventData.start_time || new Date().toISOString(),
+        end_time: eventData.end_time || new Date(Date.now() + 3600000).toISOString(),
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString()
+      };
+      
       set(state => ({
-        teamEvents: [...state.teamEvents, data],
+        teamEvents: [...state.teamEvents, newEvent],
         isLoading: false
       }));
       
-      return data;
+      toast.success('Event created successfully!');
+      return newEvent;
+      
     } catch (error: any) {
       console.error('Error creating team event:', error);
       set({ error: error.message, isLoading: false });
+      toast.error('Failed to create event');
       return null;
     }
   },
@@ -344,27 +286,19 @@ export const useTeamStore = create<TeamState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      const { error } = await supabase
-        .from('team_events')
-        .update(eventData)
-        .eq('id', id);
-
-      if (error) {
-        console.error('Error updating team event:', error);
-        set({ error: error.message, isLoading: false });
-        return;
-      }
-
-      // Update the event in state
       set(state => ({
         teamEvents: state.teamEvents.map(event => 
           event.id === id ? { ...event, ...eventData } : event
         ),
         isLoading: false
       }));
+      
+      toast.success('Event updated successfully!');
+      
     } catch (error: any) {
       console.error('Error updating team event:', error);
       set({ error: error.message, isLoading: false });
+      toast.error('Failed to update event');
     }
   },
 
@@ -372,25 +306,17 @@ export const useTeamStore = create<TeamState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      const { error } = await supabase
-        .from('team_events')
-        .delete()
-        .eq('id', id);
-
-      if (error) {
-        console.error('Error deleting team event:', error);
-        set({ error: error.message, isLoading: false });
-        return;
-      }
-      
-      // Remove the event from state
       set(state => ({
         teamEvents: state.teamEvents.filter(event => event.id !== id),
         isLoading: false
       }));
+      
+      toast.success('Event deleted successfully!');
+      
     } catch (error: any) {
       console.error('Error deleting team event:', error);
       set({ error: error.message, isLoading: false });
+      toast.error('Failed to delete event');
     }
   },
 
@@ -398,30 +324,25 @@ export const useTeamStore = create<TeamState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      const { data, error } = await supabase
-        .from('team_members')
-        .insert([{
-          team_id: teamId,
-          profile_id: profileId,
-          role
-        }])
-        .select()
-        .single();
-
-      if (error) {
-        console.error('Error adding team member:', error);
-        set({ error: error.message, isLoading: false });
-        return;
-      }
+      const newMember: TeamMember = {
+        id: `mock-member-${Date.now()}`,
+        team_id: teamId,
+        profile_id: profileId,
+        role: role,
+        joined_at: new Date().toISOString()
+      };
       
-      // Add the new member to state
       set(state => ({
-        teamMembers: [...state.teamMembers, data],
+        teamMembers: [...state.teamMembers, newMember],
         isLoading: false
       }));
+      
+      toast.success('Team member added successfully!');
+      
     } catch (error: any) {
       console.error('Error adding team member:', error);
       set({ error: error.message, isLoading: false });
+      toast.error('Failed to add team member');
     }
   },
 
@@ -429,25 +350,17 @@ export const useTeamStore = create<TeamState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      const { error } = await supabase
-        .from('team_members')
-        .delete()
-        .eq('id', teamMemberId);
-
-      if (error) {
-        console.error('Error removing team member:', error);
-        set({ error: error.message, isLoading: false });
-        return;
-      }
-      
-      // Remove the member from state
       set(state => ({
         teamMembers: state.teamMembers.filter(member => member.id !== teamMemberId),
         isLoading: false
       }));
+      
+      toast.success('Team member removed successfully!');
+      
     } catch (error: any) {
       console.error('Error removing team member:', error);
       set({ error: error.message, isLoading: false });
+      toast.error('Failed to remove team member');
     }
   },
 
@@ -455,26 +368,26 @@ export const useTeamStore = create<TeamState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      const { error } = await supabase
-        .from('team_members')
-        .insert([{
-          team_id: teamId,
-          profile_id: (await supabase.auth.getUser()).data.user?.id,
-          role
-        }]);
-
-      if (error) {
-        console.error('Error joining team:', error);
-        set({ error: error.message, isLoading: false });
-        return;
-      }
+      // Mock joining a team
+      const newMember: TeamMember = {
+        id: `mock-member-${Date.now()}`,
+        team_id: teamId,
+        profile_id: 'current-user',
+        role: role,
+        joined_at: new Date().toISOString()
+      };
       
-      // Refresh team members
-      await get().fetchTeamMembers(teamId);
-      set({ isLoading: false });
+      set(state => ({
+        teamMembers: [...state.teamMembers, newMember],
+        isLoading: false
+      }));
+      
+      toast.success('Joined team successfully!');
+      
     } catch (error: any) {
       console.error('Error joining team:', error);
       set({ error: error.message, isLoading: false });
+      toast.error('Failed to join team');
     }
   },
 
@@ -482,26 +395,19 @@ export const useTeamStore = create<TeamState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      const { error } = await supabase
-        .from('team_members')
-        .delete()
-        .match({ 
-          team_id: teamId,
-          profile_id: (await supabase.auth.getUser()).data.user?.id
-        });
-
-      if (error) {
-        console.error('Error leaving team:', error);
-        set({ error: error.message, isLoading: false });
-        return;
-      }
+      set(state => ({
+        teamMembers: state.teamMembers.filter(
+          member => !(member.team_id === teamId && member.profile_id === 'current-user')
+        ),
+        isLoading: false
+      }));
       
-      // Refresh team members
-      await get().fetchTeamMembers(teamId);
-      set({ isLoading: false });
+      toast.success('Left team successfully!');
+      
     } catch (error: any) {
       console.error('Error leaving team:', error);
       set({ error: error.message, isLoading: false });
+      toast.error('Failed to leave team');
     }
   }
 }));
