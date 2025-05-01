@@ -3,7 +3,6 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
@@ -240,7 +239,12 @@ const ProfileTab: React.FC<ProfileTabProps> = ({
           handleCheckboxChange={handleCheckboxChange}
         />
         
-        <RolesSkillsCard currentRacer={currentRacer} />
+        <RolesSkillsCard 
+          currentRacer={currentRacer}
+          isEditing={isEditing}
+          formData={formData}
+          handleCheckboxChange={handleCheckboxChange}
+        />
       </div>
     </div>
   );

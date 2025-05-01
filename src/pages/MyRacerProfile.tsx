@@ -59,11 +59,11 @@ const MyRacerProfile: React.FC = () => {
         series_focus: currentRacer.series_focus || [],
         commitment_level: currentRacer.commitment_level || '',
         availability_hours: currentRacer.availability_hours || 0,
-        platforms: [...currentRacer.platforms],
-        driving_styles: [...currentRacer.driving_styles],
-        role_tags: [...currentRacer.role_tags],
-        region: currentRacer.region,
-        timezone: currentRacer.timezone,
+        platforms: [...(currentRacer.platforms || [])],
+        driving_styles: [...(currentRacer.driving_styles || [])],
+        role_tags: [...(currentRacer.role_tags || [])],
+        region: currentRacer.region || '',
+        timezone: currentRacer.timezone || '',
         looking_for_team: currentRacer.looking_for_team
       });
     }
@@ -86,11 +86,11 @@ const MyRacerProfile: React.FC = () => {
         series_focus: currentRacer.series_focus || [],
         commitment_level: currentRacer.commitment_level || '',
         availability_hours: currentRacer.availability_hours || 0,
-        platforms: [...currentRacer.platforms],
-        driving_styles: [...currentRacer.driving_styles],
-        role_tags: [...currentRacer.role_tags],
-        region: currentRacer.region,
-        timezone: currentRacer.timezone,
+        platforms: [...(currentRacer.platforms || [])],
+        driving_styles: [...(currentRacer.driving_styles || [])],
+        role_tags: [...(currentRacer.role_tags || [])],
+        region: currentRacer.region || '',
+        timezone: currentRacer.timezone || '',
         looking_for_team: currentRacer.looking_for_team
       });
     }
@@ -193,9 +193,9 @@ const MyRacerProfile: React.FC = () => {
         </div>
         
         <Tabs 
-          defaultValue="profile" 
           value={activeTab} 
           onValueChange={setActiveTab} 
+          defaultValue="profile"
           className="w-full"
         >
           <TabsList className="bg-racing-dark-alt mb-6">

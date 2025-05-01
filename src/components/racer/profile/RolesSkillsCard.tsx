@@ -1,14 +1,23 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Racer } from '@/stores/useRacerStore';
 import RoleTag from '@/components/racer/RoleTag';
 
 interface RolesSkillsCardProps {
   currentRacer: Racer;
+  isEditing?: boolean;
+  formData?: any;
+  handleCheckboxChange?: (name: 'role_tags' | 'driving_styles', value: string, checked: boolean) => void;
 }
 
-const RolesSkillsCard: React.FC<RolesSkillsCardProps> = ({ currentRacer }) => {
+const RolesSkillsCard: React.FC<RolesSkillsCardProps> = ({ 
+  currentRacer,
+  isEditing = false,
+  formData,
+  handleCheckboxChange
+}) => {
   return (
     <Card className="racing-card">
       <CardHeader className="pb-2">
@@ -18,12 +27,28 @@ const RolesSkillsCard: React.FC<RolesSkillsCardProps> = ({ currentRacer }) => {
         <div>
           <h3 className="text-md font-semibold">Preferred Roles</h3>
           <div className="flex flex-wrap gap-2 mt-2">
-            {currentRacer.role_tags && currentRacer.role_tags.length > 0 ? (
-              currentRacer.role_tags.map((role, idx) => (
-                <RoleTag key={idx} role={role} />
-              ))
+            {isEditing ? (
+              <div className="grid grid-cols-2 gap-2">
+                {['Driver', 'Strategist', 'Team Manager', 'Endurance Pro', 'Sprint Specialist', 'Coach'].map(role => (
+                  <label key={role} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={formData?.role_tags?.includes(role)}
+                      onChange={(e) => handleCheckboxChange?.('role_tags', role, e.target.checked)}
+                      className="h-4 w-4"
+                    />
+                    <span>{role}</span>
+                  </label>
+                ))}
+              </div>
             ) : (
-              <p className="text-gray-400 italic">No roles specified.</p>
+              currentRacer.role_tags && currentRacer.role_tags.length > 0 ? (
+                currentRacer.role_tags.map((role, idx) => (
+                  <RoleTag key={idx} role={role} />
+                ))
+              ) : (
+                <p className="text-gray-400 italic">No roles specified.</p>
+              )
             )}
           </div>
         </div>
@@ -31,14 +56,30 @@ const RolesSkillsCard: React.FC<RolesSkillsCardProps> = ({ currentRacer }) => {
         <div>
           <h3 className="text-md font-semibold">Driving Style</h3>
           <div className="flex flex-wrap gap-2 mt-2">
-            {currentRacer.driving_styles && currentRacer.driving_styles.length > 0 ? (
-              currentRacer.driving_styles.map((style, idx) => (
-                <span key={idx} className="px-3 py-1 bg-gray-800 text-white rounded-md text-sm">
-                  {style}
-                </span>
-              ))
+            {isEditing ? (
+              <div className="grid grid-cols-2 gap-2">
+                {['Aggressive', 'Defensive', 'Conservative', 'Balanced', 'Endurance', 'Sprint'].map(style => (
+                  <label key={style} className="flex items-center space-x-2">
+                    <input
+                      type="checkbox"
+                      checked={formData?.driving_styles?.includes(style)}
+                      onChange={(e) => handleCheckboxChange?.('driving_styles', style, e.target.checked)}
+                      className="h-4 w-4"
+                    />
+                    <span>{style}</span>
+                  </label>
+                ))}
+              </div>
             ) : (
-              <p className="text-gray-400 italic">No driving styles specified.</p>
+              currentRacer.driving_styles && currentRacer.driving_styles.length > 0 ? (
+                currentRacer.driving_styles.map((style, idx) => (
+                  <span key={idx} className="px-3 py-1 bg-gray-800 text-white rounded-md text-sm">
+                    {style}
+                  </span>
+                ))
+              ) : (
+                <p className="text-gray-400 italic">No driving styles specified.</p>
+              )
             )}
           </div>
         </div>
