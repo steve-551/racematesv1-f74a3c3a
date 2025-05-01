@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useSetupStore, Setup } from '@/stores/useSetupStore';
 import { useRacerStore } from '@/stores/useRacerStore';
@@ -187,72 +186,72 @@ const SetupVault = () => {
             <TabsTrigger value="team-setups">Team Setups</TabsTrigger>
             <TabsTrigger value="shared-setups">Shared with Me</TabsTrigger>
           </TabsList>
-        </Tabs>
-        
-        <TabsContent value="my-setups">
-          {isLoading ? (
-            <div className="text-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-gray-400" />
-              <p>Loading your setups...</p>
-            </div>
-          ) : mySetups.length === 0 ? (
-            <div className="text-center py-12">
-              <FileUp className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-              <h2 className="text-xl font-semibold mb-2">No Setups Yet</h2>
-              <p className="text-gray-500 mb-6">Upload your first car setup to get started</p>
-              <Button onClick={() => setIsCreateDialogOpen(true)}>Upload Setup</Button>
-            </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {mySetups.map(setup => (
-                <SetupCard
-                  key={setup.id}
-                  setup={setup}
-                  onView={handleViewSetup}
-                  onShare={handleShareSetup}
-                  onDelete={handleDeleteSetup}
-                  isOwner={true}
-                />
-              ))}
-            </div>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="team-setups">
-          {isLoading ? (
-            <div className="text-center py-12">
-              <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-gray-400" />
-              <p>Loading team setups...</p>
-            </div>
-          ) : teamSetups.length === 0 ? (
+          
+          <TabsContent value="my-setups">
+            {isLoading ? (
+              <div className="text-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-gray-400" />
+                <p>Loading your setups...</p>
+              </div>
+            ) : mySetups.length === 0 ? (
+              <div className="text-center py-12">
+                <FileUp className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                <h2 className="text-xl font-semibold mb-2">No Setups Yet</h2>
+                <p className="text-gray-500 mb-6">Upload your first car setup to get started</p>
+                <Button onClick={() => setIsCreateDialogOpen(true)}>Upload Setup</Button>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {mySetups.map(setup => (
+                  <SetupCard
+                    key={setup.id}
+                    setup={setup}
+                    onView={handleViewSetup}
+                    onShare={handleShareSetup}
+                    onDelete={handleDeleteSetup}
+                    isOwner={true}
+                  />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="team-setups">
+            {isLoading ? (
+              <div className="text-center py-12">
+                <Loader2 className="h-8 w-8 animate-spin mx-auto mb-4 text-gray-400" />
+                <p>Loading team setups...</p>
+              </div>
+            ) : teamSetups.length === 0 ? (
+              <div className="text-center py-12">
+                <Share2 className="h-16 w-16 mx-auto mb-4 text-gray-300" />
+                <h2 className="text-xl font-semibold mb-2">No Team Setups</h2>
+                <p className="text-gray-500 mb-6">Teams you belong to haven't shared any setups yet</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {teamSetups.map(setup => (
+                  <SetupCard
+                    key={setup.id}
+                    setup={setup}
+                    onView={handleViewSetup}
+                    onShare={() => {}}
+                    onDelete={() => {}}
+                    isOwner={currentRacer ? setup.owner_id === currentRacer.id : false}
+                  />
+                ))}
+              </div>
+            )}
+          </TabsContent>
+          
+          <TabsContent value="shared-setups">
             <div className="text-center py-12">
               <Share2 className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-              <h2 className="text-xl font-semibold mb-2">No Team Setups</h2>
-              <p className="text-gray-500 mb-6">Teams you belong to haven't shared any setups yet</p>
+              <h2 className="text-xl font-semibold mb-2">Shared Setups</h2>
+              <p className="text-gray-500">Setups shared directly with you will appear here</p>
             </div>
-          ) : (
-            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {teamSetups.map(setup => (
-                <SetupCard
-                  key={setup.id}
-                  setup={setup}
-                  onView={handleViewSetup}
-                  onShare={() => {}}
-                  onDelete={() => {}}
-                  isOwner={currentRacer ? setup.owner_id === currentRacer.id : false}
-                />
-              ))}
-            </div>
-          )}
-        </TabsContent>
-        
-        <TabsContent value="shared-setups">
-          <div className="text-center py-12">
-            <Share2 className="h-16 w-16 mx-auto mb-4 text-gray-300" />
-            <h2 className="text-xl font-semibold mb-2">Shared Setups</h2>
-            <p className="text-gray-500">Setups shared directly with you will appear here</p>
-          </div>
-        </TabsContent>
+          </TabsContent>
+        </Tabs>
       </div>
       
       {/* Create Setup Dialog */}

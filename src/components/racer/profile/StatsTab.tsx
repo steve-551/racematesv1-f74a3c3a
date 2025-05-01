@@ -10,7 +10,7 @@ interface StatsDisciplineContentProps {
 }
 
 const StatsDisciplineContent: React.FC<StatsDisciplineContentProps> = ({ stats }) => {
-  if (!stats.irating && !stats.sr && !stats.licence) {
+  if (!stats?.irating && !stats?.sr && !stats?.licence) {
     return (
       <div className="text-center py-12">
         <p className="text-gray-400">No data available for this discipline.</p>
@@ -23,7 +23,7 @@ const StatsDisciplineContent: React.FC<StatsDisciplineContentProps> = ({ stats }
       <div className="bg-gray-800 p-4 rounded-lg">
         <div className="flex justify-between items-center mb-4">
           <h3 className="text-lg font-semibold">Ratings & License</h3>
-          {stats.licence && (
+          {stats?.licence && (
             <LicenseClassBadge licenseClass={stats.licence} size="lg" />
           )}
         </div>
@@ -31,15 +31,15 @@ const StatsDisciplineContent: React.FC<StatsDisciplineContentProps> = ({ stats }
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
           <div>
             <p className="text-xs text-gray-400">iRating</p>
-            <p className="text-2xl font-bold">{stats.irating || '-'}</p>
+            <p className="text-2xl font-bold">{stats?.irating || '-'}</p>
           </div>
           <div>
             <p className="text-xs text-gray-400">Safety Rating</p>
-            <p className="text-2xl font-bold">{stats.sr ? stats.sr.toFixed(2) : '-'}</p>
+            <p className="text-2xl font-bold">{stats?.sr ? stats.sr.toFixed(2) : '-'}</p>
           </div>
           <div>
             <p className="text-xs text-gray-400">Time Trial Rating</p>
-            <p className="text-2xl font-bold">{stats.tt || '-'}</p>
+            <p className="text-2xl font-bold">{stats?.tt || '-'}</p>
           </div>
         </div>
       </div>
@@ -50,23 +50,23 @@ const StatsDisciplineContent: React.FC<StatsDisciplineContentProps> = ({ stats }
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-6 text-center">
           <div>
             <p className="text-xs text-gray-400">Races</p>
-            <p className="text-2xl font-bold">{stats.starts || '-'}</p>
+            <p className="text-2xl font-bold">{stats?.starts || '-'}</p>
           </div>
           <div>
             <p className="text-xs text-gray-400">Wins</p>
-            <p className="text-2xl font-bold">{stats.wins || '-'}</p>
+            <p className="text-2xl font-bold">{stats?.wins || '-'}</p>
           </div>
           <div>
             <p className="text-xs text-gray-400">Top 5</p>
-            <p className="text-2xl font-bold">{stats.top5 || '-'}</p>
+            <p className="text-2xl font-bold">{stats?.top5 || '-'}</p>
           </div>
           <div>
             <p className="text-xs text-gray-400">Avg. Finish</p>
-            <p className="text-2xl font-bold">{stats.avg_finish ? stats.avg_finish.toFixed(1) : '-'}</p>
+            <p className="text-2xl font-bold">{stats?.avg_finish ? stats.avg_finish.toFixed(1) : '-'}</p>
           </div>
         </div>
         
-        {stats.wins && stats.starts && (
+        {stats?.wins && stats?.starts && (
           <div className="mt-4">
             <p className="text-sm text-gray-400">Win Rate: {((stats.wins / stats.starts) * 100).toFixed(1)}%</p>
             <div className="h-2 bg-gray-700 rounded-full mt-1">
@@ -104,23 +104,23 @@ const StatsTab: React.FC<StatsTabProps> = ({ currentRacer }) => {
             </TabsList>
             
             <TabsContent value="road">
-              <StatsDisciplineContent stats={currentRacer.statsByDiscipline.road} />
+              <StatsDisciplineContent stats={currentRacer?.statsByDiscipline?.road || {}} />
             </TabsContent>
             
             <TabsContent value="oval">
-              <StatsDisciplineContent stats={currentRacer.statsByDiscipline.oval} />
+              <StatsDisciplineContent stats={currentRacer?.statsByDiscipline?.oval || {}} />
             </TabsContent>
             
             <TabsContent value="dirt_road">
-              <StatsDisciplineContent stats={currentRacer.statsByDiscipline.dirt_road} />
+              <StatsDisciplineContent stats={currentRacer?.statsByDiscipline?.dirt_road || {}} />
             </TabsContent>
             
             <TabsContent value="dirt_oval">
-              <StatsDisciplineContent stats={currentRacer.statsByDiscipline.dirt_oval} />
+              <StatsDisciplineContent stats={currentRacer?.statsByDiscipline?.dirt_oval || {}} />
             </TabsContent>
             
             <TabsContent value="rx">
-              <StatsDisciplineContent stats={currentRacer.statsByDiscipline.rx} />
+              <StatsDisciplineContent stats={currentRacer?.statsByDiscipline?.rx || {}} />
             </TabsContent>
           </Tabs>
         </CardContent>
