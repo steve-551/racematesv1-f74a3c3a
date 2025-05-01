@@ -103,7 +103,7 @@ const Dashboard = () => {
           {/* Main Content - Left Column */}
           <div className="lg:col-span-2 space-y-6">
             {/* Teams Section */}
-            <Card className="bg-neutral-200">
+            <Card className="bg-neutral-200 rounded-2xl">
               <CardHeader className="pb-3 bg-neutral-50">
                 <CardTitle>My Teams</CardTitle>
                 <CardDescription>Teams you are a member of</CardDescription>
@@ -147,7 +147,7 @@ const Dashboard = () => {
             </Card>
 
             {/* Upcoming Events Section */}
-            <Card className="bg-neutral-200">
+            <Card className="bg-neutral-200 rounded-2xl">
               <CardHeader className="pb-3 bg-neutral-50">
                 <CardTitle>Upcoming Events</CardTitle>
                 <CardDescription>Your scheduled racing events</CardDescription>
@@ -191,7 +191,7 @@ const Dashboard = () => {
             </Card>
 
             {/* Notice Board Highlights Section */}
-            <Card className="bg-neutral-200">
+            <Card className="bg-neutral-200 rounded-2xl">
               <CardHeader className="pb-3 bg-neutral-50">
                 <CardTitle>Notice Board</CardTitle>
                 <CardDescription>Recent racing notices</CardDescription>
@@ -211,7 +211,7 @@ const Dashboard = () => {
           {/* Sidebar - Right Column */}
           <div className="space-y-6">
             {/* Quick Stats Panel */}
-            <Card className="bg-neutral-200">
+            <Card className="bg-neutral-200 rounded-2xl">
               <CardHeader className="pb-3 bg-neutral-50">
                 <CardTitle>Racing Profile</CardTitle>
               </CardHeader>
@@ -255,7 +255,7 @@ const Dashboard = () => {
             </Card>
 
             {/* Quick Links Panel */}
-            <Card className="bg-neutral-200">
+            <Card className="bg-neutral-200 rounded-2xl">
               <CardHeader className="pb-3 bg-neutral-50">
                 <CardTitle>Quick Links</CardTitle>
               </CardHeader>
@@ -288,7 +288,7 @@ const Dashboard = () => {
             </Card>
 
             {/* Recommended Racers Panel */}
-            <Card className="bg-neutral-200">
+            <Card className="bg-neutral-200 rounded-2xl">
               <CardHeader className="pb-3 bg-neutral-50">
                 <CardTitle>Recommended Racers</CardTitle>
                 <CardDescription>People you might want to race with</CardDescription>

@@ -74,7 +74,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Sidebar */}
       <div className={`fixed left-0 top-0 h-full z-50 w-64 transform transition-transform duration-200 ease-in-out bg-gray-900 text-white
         ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:relative lg:translate-x-0`}>
-        <div className="flex flex-col h-full bg-neutral-200">
+        <div className="flex flex-col h-full bg-neutral-200 rounded-2xl">
           {/* Sidebar Header */}
           <div className="p-4 bg-neutral-50">
             <div className="flex items-center justify-between">
