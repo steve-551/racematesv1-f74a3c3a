@@ -97,7 +97,7 @@ export const useFriendshipStore = create<FriendshipState>((set, get) => ({
       set({ isLoading: true, error: null });
       
       // Mock implementation for sending a friend request
-      const newRequest = {
+      const newRequest: FriendRequest = {
         id: `mock-request-${Date.now()}`,
         requestor_id: 'current-user',
         addressee_id: addresseeId,
@@ -109,7 +109,7 @@ export const useFriendshipStore = create<FriendshipState>((set, get) => ({
           display_name: 'New Friend',
           avatar_url: `https://api.dicebear.com/7.x/avataaars/svg?seed=${addresseeId}`
         }
-      } as FriendRequest;
+      };
       
       // Add to sent requests
       set(state => ({ 
@@ -184,7 +184,9 @@ export const useFriendshipStore = create<FriendshipState>((set, get) => ({
             return {
               friends: [...state.friends, acceptedRequest],
               friendRequests: state.friendRequests.filter(req => req.id !== requestId),
-              isLoading: false
+              isLoading: false,
+              error: null,
+              sentRequests: state.sentRequests
             };
           }
           
@@ -195,7 +197,10 @@ export const useFriendshipStore = create<FriendshipState>((set, get) => ({
       } else {
         set(state => ({
           friendRequests: state.friendRequests.filter(req => req.id !== requestId),
-          isLoading: false
+          isLoading: false,
+          error: null,
+          friends: state.friends,
+          sentRequests: state.sentRequests
         }));
         
         if (status === 'rejected') toast.info("Friend request rejected");
@@ -215,7 +220,10 @@ export const useFriendshipStore = create<FriendshipState>((set, get) => ({
       
       set(state => ({
         friends: state.friends.filter(friend => friend.id !== friendshipId),
-        isLoading: false
+        isLoading: false,
+        error: null,
+        friendRequests: state.friendRequests,
+        sentRequests: state.sentRequests
       }));
       
       toast.success("Friend removed successfully");

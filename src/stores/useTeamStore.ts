@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { supabase } from '@/lib/supabaseClient';
 import { Racer } from '@/stores/useRacerStore';
@@ -79,7 +80,8 @@ const MOCK_TEAMS: Team[] = [
     achievements: 'Winner of 24h Nürburgring 2023, GT3 Championship runners-up',
     created_at: '2023-01-01',
     updated_at: '2023-01-01',
-    platforms: ['iRacing', 'ACC']
+    platforms: ['iRacing', 'ACC'],
+    owner_id: 'current-user'
   },
   {
     id: '2',
@@ -111,6 +113,50 @@ const MOCK_TEAMS: Team[] = [
   }
 ];
 
+// Mock team members data
+const MOCK_TEAM_MEMBERS: TeamMember[] = [
+  {
+    id: 'tm-1',
+    team_id: '1',
+    profile_id: 'current-user',
+    role: 'Owner',
+    joined_at: '2023-01-01T00:00:00Z',
+    profile: {
+      id: 'current-user',
+      display_name: 'Current User',
+      avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=CurrentUser'
+    } as Racer
+  },
+  {
+    id: 'tm-2',
+    team_id: '1',
+    profile_id: 'user-1',
+    role: 'Driver',
+    joined_at: '2023-01-02T00:00:00Z',
+    profile: {
+      id: 'user-1',
+      display_name: 'Alex Johnson',
+      avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alex'
+    } as Racer
+  }
+];
+
+// Mock team events data
+const MOCK_TEAM_EVENTS: TeamEvent[] = [
+  {
+    id: 'event-1',
+    team_id: '1',
+    creator_id: 'current-user',
+    title: 'Weekly Team Practice',
+    description: 'Regular practice session for the upcoming endurance race',
+    event_type: 'practice',
+    start_time: '2023-06-10T18:00:00Z',
+    end_time: '2023-06-10T20:00:00Z',
+    created_at: '2023-06-01T12:00:00Z',
+    updated_at: '2023-06-01T12:00:00Z'
+  }
+];
+
 export const useTeamStore = create<TeamState>((set, get) => ({
   teams: [],
   currentTeam: null,
@@ -124,8 +170,9 @@ export const useTeamStore = create<TeamState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      // Load mock teams instead of fetching from Supabase due to error
+      // Use mock data as workaround for Supabase errors
       set({ teams: MOCK_TEAMS, isLoading: false });
+      
     } catch (error: any) {
       console.error('Error fetching teams:', error);
       set({ error: error.message, isLoading: false });
@@ -138,9 +185,16 @@ export const useTeamStore = create<TeamState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      // Find team from mock data instead of fetching from Supabase
+      // Find team from mock data
       const team = MOCK_TEAMS.find(team => team.id === id);
       set({ currentTeam: team || null, isLoading: false });
+      
+      // Also fetch team members and events when fetching a team
+      if (team) {
+        const teamMembers = MOCK_TEAM_MEMBERS.filter(member => member.team_id === id);
+        const teamEvents = MOCK_TEAM_EVENTS.filter(event => event.team_id === id);
+        set({ teamMembers, teamEvents });
+      }
       
     } catch (error: any) {
       console.error('Error fetching team by ID:', error);
@@ -152,8 +206,9 @@ export const useTeamStore = create<TeamState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      // Use mock team members for now
-      set({ teamMembers: [], isLoading: false });
+      // Use mock team members 
+      const teamMembers = MOCK_TEAM_MEMBERS.filter(member => member.team_id === teamId);
+      set({ teamMembers, isLoading: false });
       
     } catch (error: any) {
       console.error('Error fetching team members:', error);
@@ -165,8 +220,9 @@ export const useTeamStore = create<TeamState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      // Use mock team events for now
-      set({ teamEvents: [], isLoading: false });
+      // Use mock team events
+      const teamEvents = MOCK_TEAM_EVENTS.filter(event => event.team_id === teamId);
+      set({ teamEvents, isLoading: false });
       
     } catch (error: any) {
       console.error('Error fetching team events:', error);
@@ -208,10 +264,29 @@ export const useTeamStore = create<TeamState>((set, get) => ({
         owner_id: 'current-user'
       };
 
+      // Add the new team to state
       set(state => ({
         teams: [...state.teams, newTeam],
         currentTeam: newTeam,
         isLoading: false
+      }));
+      
+      // Also create a team member entry for the creator
+      const newTeamMember: TeamMember = {
+        id: `tm-${Date.now()}`,
+        team_id: newTeam.id,
+        profile_id: 'current-user',
+        role: 'Owner',
+        joined_at: new Date().toISOString(),
+        profile: {
+          id: 'current-user',
+          display_name: 'Current User',
+          avatar_url: 'https://api.dicebear.com/7.x/avataaars/svg?seed=CurrentUser'
+        } as Racer
+      };
+      
+      set(state => ({
+        teamMembers: [...state.teamMembers, newTeamMember]
       }));
       
       toast.success('Team created successfully!');

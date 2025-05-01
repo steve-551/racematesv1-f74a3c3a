@@ -105,27 +105,6 @@ const RacerProfile: React.FC = () => {
 
   const isProfileLoading = isLoading || loadingProfile;
 
-  if (error) {
-    return (
-      <MainLayout>
-        <div className="container mx-auto px-4 py-16 text-center">
-          <p className="text-lg text-red-500">Error loading racer profile: {error}</p>
-          <Button variant="outline" size="sm" asChild className="mt-4">
-            <Link to="/find-racers">← Back to Racers</Link>
-          </Button>
-        </div>
-      </MainLayout>
-    );
-  }
-
-  const disciplines = [
-    { key: 'road', label: 'Road' },
-    { key: 'oval', label: 'Oval' },
-    { key: 'dirt_oval', label: 'Dirt Oval' },
-    { key: 'dirt_road', label: 'Dirt Road' },
-    { key: 'rx', label: 'Rallycross (RX)' },
-  ];
-
   const renderFriendshipButton = () => {
     if (friendshipStatus === 'accepted') {
       return (
@@ -155,6 +134,19 @@ const RacerProfile: React.FC = () => {
       );
     }
   };
+
+  if (error) {
+    return (
+      <MainLayout>
+        <div className="container mx-auto px-4 py-16 text-center">
+          <p className="text-lg text-red-500">Error loading racer profile: {error}</p>
+          <Button variant="outline" size="sm" asChild className="mt-4">
+            <Link to="/find-racers">← Back to Racers</Link>
+          </Button>
+        </div>
+      </MainLayout>
+    );
+  }
 
   return (
     <MainLayout>
@@ -302,15 +294,20 @@ const RacerProfile: React.FC = () => {
                   <CardTitle className="font-rajdhani">iRacing Stats by Discipline</CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {disciplines.map(({ key, label }) => {
-                    const stats = currentRacer.statsByDiscipline?.[key as keyof typeof currentRacer.statsByDiscipline];
-                    if (!stats) return null;
+                  {currentRacer.statsByDiscipline && Object.entries(currentRacer.statsByDiscipline).map(([key, stats]) => {
+                    // Skip if no stats or all stats are null
+                    if (!stats || (stats.irating === null && stats.sr === null && 
+                        stats.licence === null && stats.tt === null)) {
+                      return null;
+                    }
 
-                    // Skip disciplines with no stats
-                    const hasStats = stats.irating !== null || stats.sr !== null || 
-                                   stats.licence !== null || stats.tt !== null;
-                    
-                    if (!hasStats) return null;
+                    // Get label based on key
+                    let label = key.charAt(0).toUpperCase() + key.slice(1);
+                    if (key === 'road') label = 'Road';
+                    else if (key === 'oval') label = 'Oval';
+                    else if (key === 'dirt_oval') label = 'Dirt Oval';
+                    else if (key === 'dirt_road') label = 'Dirt Road';
+                    else if (key === 'rx') label = 'Rallycross (RX)';
 
                     return (
                       <div key={key} className="bg-gray-800 p-4 rounded-md">
@@ -344,12 +341,7 @@ const RacerProfile: React.FC = () => {
                     );
                   })}
                   
-                  {!disciplines.some(({ key }) => {
-                    const stats = currentRacer.statsByDiscipline?.[key as keyof typeof currentRacer.statsByDiscipline];
-                    if (!stats) return false;
-                    return stats.irating !== null || stats.sr !== null || 
-                           stats.licence !== null || stats.tt !== null;
-                  }) && (
+                  {!currentRacer.statsByDiscipline || Object.keys(currentRacer.statsByDiscipline).length === 0 && (
                     <p className="text-center text-gray-400 py-8">No racing statistics available</p>
                   )}
                 </CardContent>

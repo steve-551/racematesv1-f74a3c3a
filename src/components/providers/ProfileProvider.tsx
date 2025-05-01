@@ -33,16 +33,21 @@ export const ProfileProvider = ({ children }: { children: React.ReactNode }) => 
   const [hasAttemptedProfileFetch, setHasAttemptedProfileFetch] = useState(false);
   const [hasAttemptedTeamsFetch, setHasAttemptedTeamsFetch] = useState(false);
   const [userTeams, setUserTeams] = useState<Team[]>([]);
+  const [fetchError, setFetchError] = useState<string | null>(null);
 
+  // Fetch profile on mount if user is logged in
   useEffect(() => {
     if (user && !hasAttemptedProfileFetch) {
       const fetchProfile = async () => {
         try {
           await fetchCurrentRacerProfile();
-          setHasAttemptedProfileFetch(true);
+          setFetchError(null);
         } catch (error) {
           console.error("Failed to fetch racer profile:", error);
+          setFetchError("Failed to load profile data");
           toast.error("Failed to load your profile data");
+        } finally {
+          setHasAttemptedProfileFetch(true);
         }
       };
       
@@ -52,15 +57,17 @@ export const ProfileProvider = ({ children }: { children: React.ReactNode }) => 
     }
   }, [user, fetchCurrentRacerProfile, hasAttemptedProfileFetch]);
   
+  // Fetch teams on mount if user is logged in
   useEffect(() => {
     if (user && !hasAttemptedTeamsFetch) {
       const fetchUserTeams = async () => {
         try {
           await fetchTeams();
-          setHasAttemptedTeamsFetch(true);
         } catch (error) {
           console.error("Failed to fetch teams:", error);
-          toast.error("Failed to load your teams data");
+          // Don't show toast here since it's already being shown from fetchTeams
+        } finally {
+          setHasAttemptedTeamsFetch(true);
         }
       };
       
@@ -83,11 +90,14 @@ export const ProfileProvider = ({ children }: { children: React.ReactNode }) => 
     if (user) {
       try {
         await fetchTeams();
+        return Promise.resolve();
       } catch (error) {
         console.error("Failed to refresh teams:", error);
         toast.error("Failed to refresh your teams data");
+        return Promise.reject(error);
       }
     }
+    return Promise.resolve();
   };
 
   const contextValue: ProfileContextType = {

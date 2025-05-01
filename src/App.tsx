@@ -20,6 +20,7 @@ import MyRacerProfile from "./pages/MyRacerProfile";
 import Onboarding from "./pages/Onboarding";
 import NoticeBoard from "./pages/NoticeBoard";
 import TeamDashboard from "./pages/TeamDashboard";
+import Teams from "./pages/Teams";
 
 // Create a client
 const queryClient = new QueryClient();
@@ -46,6 +47,7 @@ const App = () => {
                   <Route path="/onboarding" element={<Onboarding />} />
                   <Route path="/notice-board" element={<NoticeBoard />} />
                   <Route path="/team/:id" element={<TeamDashboard />} />
+                  <Route path="/teams" element={<Teams />} />
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </ProfileProvider>
