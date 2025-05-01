@@ -44,7 +44,7 @@ const MOCK_FRIENDS = [
     id: 'mock-friend-1',
     requestor_id: 'user-1',
     addressee_id: 'current-user',
-    status: 'accepted',
+    status: 'accepted' as const,
     created_at: '2023-01-15T12:00:00Z',
     updated_at: '2023-01-15T12:05:00Z',
     requestor: {
@@ -57,7 +57,7 @@ const MOCK_FRIENDS = [
     id: 'mock-friend-2',
     requestor_id: 'current-user',
     addressee_id: 'user-2',
-    status: 'accepted',
+    status: 'accepted' as const,
     created_at: '2023-02-20T15:30:00Z',
     updated_at: '2023-02-20T16:00:00Z',
     addressee: {
@@ -74,7 +74,7 @@ const MOCK_FRIEND_REQUESTS = [
     id: 'mock-request-1',
     requestor_id: 'user-3',
     addressee_id: 'current-user',
-    status: 'pending',
+    status: 'pending' as const,
     created_at: '2023-03-10T09:15:00Z',
     updated_at: '2023-03-10T09:15:00Z',
     requestor: {
@@ -101,7 +101,7 @@ export const useFriendshipStore = create<FriendshipState>((set, get) => ({
         id: `mock-request-${Date.now()}`,
         requestor_id: 'current-user',
         addressee_id: addresseeId,
-        status: 'pending',
+        status: 'pending' as const,
         created_at: new Date().toISOString(),
         updated_at: new Date().toISOString(),
         addressee: {
@@ -175,7 +175,7 @@ export const useFriendshipStore = create<FriendshipState>((set, get) => ({
           const request = state.friendRequests.find(req => req.id === requestId);
           
           if (request) {
-            const acceptedRequest = {
+            const acceptedRequest: FriendRequest = {
               ...request,
               status: 'accepted',
               updated_at: new Date().toISOString()
@@ -188,7 +188,7 @@ export const useFriendshipStore = create<FriendshipState>((set, get) => ({
             };
           }
           
-          return state;
+          return { ...state, isLoading: false };
         });
         
         toast.success("Friend request accepted!");
