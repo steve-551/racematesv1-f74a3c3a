@@ -104,7 +104,7 @@ const Dashboard = () => {
           <div className="lg:col-span-2 space-y-6">
             {/* Teams Section */}
             <Card className="bg-neutral-200">
-              <CardHeader className="pb-3">
+              <CardHeader className="pb-3 bg-racing-red">
                 <CardTitle>My Teams</CardTitle>
                 <CardDescription>Teams you are a member of</CardDescription>
               </CardHeader>
@@ -148,7 +148,7 @@ const Dashboard = () => {
 
             {/* Upcoming Events Section */}
             <Card className="bg-neutral-200">
-              <CardHeader className="pb-3">
+              <CardHeader className="pb-3 bg-racing-red">
                 <CardTitle>Upcoming Events</CardTitle>
                 <CardDescription>Your scheduled racing events</CardDescription>
               </CardHeader>
@@ -192,7 +192,7 @@ const Dashboard = () => {
 
             {/* Notice Board Highlights Section */}
             <Card className="bg-neutral-200">
-              <CardHeader className="pb-3">
+              <CardHeader className="pb-3 bg-racing-red">
                 <CardTitle>Notice Board</CardTitle>
                 <CardDescription>Recent racing notices</CardDescription>
               </CardHeader>
@@ -212,7 +212,7 @@ const Dashboard = () => {
           <div className="space-y-6">
             {/* Quick Stats Panel */}
             <Card className="bg-neutral-200">
-              <CardHeader className="pb-3">
+              <CardHeader className="pb-3 bg-racing-red">
                 <CardTitle>Racing Profile</CardTitle>
               </CardHeader>
               <CardContent>
@@ -289,7 +289,7 @@ const Dashboard = () => {
 
             {/* Recommended Racers Panel */}
             <Card className="bg-neutral-200">
-              <CardHeader className="pb-3">
+              <CardHeader className="pb-3 bg-racing-red">
                 <CardTitle>Recommended Racers</CardTitle>
                 <CardDescription>People you might want to race with</CardDescription>
               </CardHeader>
