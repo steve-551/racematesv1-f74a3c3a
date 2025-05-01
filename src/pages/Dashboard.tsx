@@ -139,7 +139,7 @@ const Dashboard = () => {
                   </div>}
               </CardContent>
               {userTeams.length > 0 && <CardFooter className="border-t pt-3">
-                  <Button variant="outline" className="w-full" onClick={() => setIsCreateTeamDialogOpen(true)}>
+                  <Button variant="outline" onClick={() => setIsCreateTeamDialogOpen(true)} className="w-full bg-racing-red">
                     <Plus className="h-4 w-4 mr-2" />
                     Create New Team
                   </Button>
