@@ -119,7 +119,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
           <div className="p-4">
             <Separator className="mb-4 bg-gray-700" />
             <div className="flex flex-col space-y-2">
-              <Button variant="ghost" className="flex justify-start space-x-3 text-gray-300 hover:text-white hover:bg-gray-700" onClick={handleSignOut}>
+              <Button variant="ghost" onClick={handleSignOut} className="flex justify-start space-x-3 text-gray-300 hover:text-white bg-racing-red">
                 <LogOut className="h-5 w-5" />
                 <span>Logout</span>
               </Button>
