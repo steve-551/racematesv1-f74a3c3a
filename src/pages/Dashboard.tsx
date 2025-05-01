@@ -236,7 +236,7 @@ const Dashboard = () => {
                     <p className="text-sm text-gray-500">Friends</p>
                     <p className="font-bold text-xl">{friends.length}</p>
                   </div>
-                  <div className="bg-gray-100 dark:bg-gray-800 p-3 rounded-lg text-center">
+                  <div className="p-3 text-center bg-racing-red rounded-lg">
                     <p className="text-sm text-gray-500">Teams</p>
                     <p className="font-bold text-xl">{userTeams.length}</p>
                   </div>
