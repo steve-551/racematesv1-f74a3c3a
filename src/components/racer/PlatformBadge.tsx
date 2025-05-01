@@ -1,45 +1,39 @@
 
 import React from 'react';
-import { Platform } from '@/stores/useRacerStore';
-import { Badge } from '@/components/ui/badge';
 
 interface PlatformBadgeProps {
-  platform: Platform;
+  platform: string;
 }
 
 const PlatformBadge: React.FC<PlatformBadgeProps> = ({ platform }) => {
-  // Different background colors based on platform
-  let bgColor;
-  switch (platform) {
-    case 'iRacing':
-      bgColor = 'bg-blue-800';
-      break;
-    case 'F1':
-      bgColor = 'bg-red-800';
-      break;
-    case 'ACC':
-      bgColor = 'bg-orange-800';
-      break;
-    case 'GT7':
-      bgColor = 'bg-indigo-800';
-      break;
-    case 'rFactor':
-      bgColor = 'bg-green-800';
-      break;
-    case 'Automobilista':
-      bgColor = 'bg-purple-800';
-      break;
-    case 'RaceRoom':
-      bgColor = 'bg-yellow-800 text-black';
-      break;
-    default:
-      bgColor = 'bg-gray-800';
-  }
+  // Function to get appropriate color based on platform
+  const getPlatformColor = (platform: string) => {
+    switch (platform.toLowerCase()) {
+      case 'iracing':
+        return 'bg-blue-900 text-blue-100';
+      case 'f1':
+        return 'bg-red-900 text-red-100';
+      case 'acc':
+        return 'bg-green-900 text-green-100';
+      case 'gt7':
+        return 'bg-purple-900 text-purple-100';
+      case 'rfactor':
+        return 'bg-yellow-900 text-yellow-100';
+      case 'automobilista':
+        return 'bg-orange-900 text-orange-100';
+      case 'raceroom':
+        return 'bg-indigo-900 text-indigo-100';
+      default:
+        return 'bg-gray-800 text-gray-200';
+    }
+  };
+
+  const colorClasses = getPlatformColor(platform);
 
   return (
-    <Badge className={`${bgColor} mr-1 mb-1`} variant="outline">
+    <span className={`px-2 py-1 rounded text-xs font-medium ${colorClasses}`}>
       {platform}
-    </Badge>
+    </span>
   );
 };
 

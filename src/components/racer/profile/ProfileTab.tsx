@@ -6,20 +6,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import XpProgressBar from '@/components/racer/XpProgressBar';
-import RoleTag from '@/components/racer/RoleTag';
-import PlatformBadge from '@/components/racer/PlatformBadge';
 import { Upload, Save } from 'lucide-react';
 import { Racer } from '@/stores/useRacerStore';
+import BioCareerCard from './BioCareerCard';
+import PreferencesCard from './PreferencesCard';
+import RolesSkillsCard from './RolesSkillsCard';
 
 interface ProfileTabProps {
   currentRacer: Racer;
   isEditing: boolean;
   formData: any;
   handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement | HTMLTextAreaElement>) => void;
-  handleCheckboxChange: (name: 'platforms' | 'driving_styles' | 'favorite_disciplines' | 'favorite_car_types' | 'series_focus', value: string, checked: boolean) => void;
+  handleCheckboxChange: (name: 'platforms' | 'driving_styles' | 'favorite_disciplines' | 'favorite_car_types' | 'series_focus' | 'role_tags' | 'looking_for_team', value: string, checked: boolean) => void;
   handleToggleLookingForTeam: (value: boolean) => Promise<void>;
   handleSaveProfile: () => Promise<void>;
 }
@@ -192,7 +192,7 @@ const ProfileTab: React.FC<ProfileTabProps> = ({
                 ) : (
                   <div className="flex flex-wrap gap-1 mb-4">
                     {currentRacer.platforms.map(platform => (
-                      <PlatformBadge key={platform} platform={platform} />
+                      <span key={platform} className="px-2 py-1 text-xs bg-gray-800 rounded">{platform}</span>
                     ))}
                   </div>
                 )}

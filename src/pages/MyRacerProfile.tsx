@@ -112,7 +112,7 @@ const MyRacerProfile: React.FC = () => {
     }
   };
   
-  const handleCheckboxChange = (name: 'platforms' | 'driving_styles' | 'favorite_disciplines' | 'favorite_car_types' | 'series_focus' | 'looking_for_team', value: string, checked: boolean) => {
+  const handleCheckboxChange = (name: 'platforms' | 'driving_styles' | 'favorite_disciplines' | 'favorite_car_types' | 'series_focus' | 'role_tags' | 'looking_for_team', value: string, checked: boolean) => {
     if (name === 'looking_for_team') {
       setFormData(prev => ({ ...prev, [name]: checked }));
       return;
