@@ -76,7 +76,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
         ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:relative lg:translate-x-0`}>
         <div className="flex flex-col h-full bg-neutral-200 rounded-2xl">
           {/* Sidebar Header */}
-          <div className="p-4 bg-neutral-50">
+          <div className="p-4 bg-neutral-50 rounded-none">
             <div className="flex items-center justify-between">
               <Link to="/" onClick={closeSidebar} className="flex items-center space-x-2">
                 <div className="font-orbitron text-xl font-bold">Race Mates</div>
