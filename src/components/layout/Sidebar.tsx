@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuthStore } from '@/stores/useAuthStore';
@@ -7,11 +6,9 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { LayoutDashboard, Users, Calendar, Settings, Menu, X, LogOut, User, FileText, MessageSquare, Home, UserPlus } from 'lucide-react';
-
 interface SidebarProps {
   children: React.ReactNode;
 }
-
 export const Sidebar: React.FC<SidebarProps> = ({
   children
 }) => {
@@ -26,55 +23,43 @@ export const Sidebar: React.FC<SidebarProps> = ({
   } = useProfile();
   const toggleSidebar = () => setIsOpen(!isOpen);
   const closeSidebar = () => setIsOpen(false);
-  
-  const navItems = [
-    {
-      path: '/dashboard',
-      icon: <LayoutDashboard className="h-5 w-5" />,
-      label: 'Dashboard'
-    }, 
-    {
-      path: '/find-racers',
-      icon: <Users className="h-5 w-5" />,
-      label: 'Find Racers'
-    }, 
-    {
-      path: '/events',
-      icon: <Calendar className="h-5 w-5" />,
-      label: 'Events'
-    },
-    {
-      path: '/teams',
-      icon: <UserPlus className="h-5 w-5" />,
-      label: 'Teams'
-    },
-    {
-      path: '/setups',
-      icon: <FileText className="h-5 w-5" />,
-      label: 'Setups'
-    }, 
-    {
-      path: '/stints',
-      icon: <Calendar className="h-5 w-5" />,
-      label: 'Stint Planner'
-    }, 
-    {
-      path: '/notice-board',
-      icon: <MessageSquare className="h-5 w-5" />,
-      label: 'Notice Board'
-    }, 
-    {
-      path: '/profile',
-      icon: <User className="h-5 w-5" />,
-      label: 'My Profile'
-    }
-  ];
-  
+  const navItems = [{
+    path: '/dashboard',
+    icon: <LayoutDashboard className="h-5 w-5" />,
+    label: 'Dashboard'
+  }, {
+    path: '/find-racers',
+    icon: <Users className="h-5 w-5" />,
+    label: 'Find Racers'
+  }, {
+    path: '/events',
+    icon: <Calendar className="h-5 w-5" />,
+    label: 'Events'
+  }, {
+    path: '/teams',
+    icon: <UserPlus className="h-5 w-5" />,
+    label: 'Teams'
+  }, {
+    path: '/setups',
+    icon: <FileText className="h-5 w-5" />,
+    label: 'Setups'
+  }, {
+    path: '/stints',
+    icon: <Calendar className="h-5 w-5" />,
+    label: 'Stint Planner'
+  }, {
+    path: '/notice-board',
+    icon: <MessageSquare className="h-5 w-5" />,
+    label: 'Notice Board'
+  }, {
+    path: '/profile',
+    icon: <User className="h-5 w-5" />,
+    label: 'My Profile'
+  }];
   const handleSignOut = async () => {
     await signOut();
     window.location.href = '/';
   };
-  
   return <div className="flex min-h-screen">
       {/* Mobile Overlay */}
       {isOpen && <div className="fixed inset-0 bg-black/50 z-40 lg:hidden" onClick={closeSidebar} />}
@@ -89,9 +74,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
       {/* Sidebar */}
       <div className={`fixed left-0 top-0 h-full z-50 w-64 transform transition-transform duration-200 ease-in-out bg-gray-900 text-white
         ${isOpen ? 'translate-x-0' : '-translate-x-full'} lg:relative lg:translate-x-0`}>
-        <div className="flex flex-col h-full">
+        <div className="flex flex-col h-full bg-neutral-200">
           {/* Sidebar Header */}
-          <div className="p-4">
+          <div className="p-4 bg-neutral-50">
             <div className="flex items-center justify-between">
               <Link to="/" onClick={closeSidebar} className="flex items-center space-x-2">
                 <div className="font-orbitron text-xl font-bold">Race Mates</div>
@@ -149,5 +134,4 @@ export const Sidebar: React.FC<SidebarProps> = ({
       </div>
     </div>;
 };
-
 export default Sidebar;
