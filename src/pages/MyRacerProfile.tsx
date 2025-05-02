@@ -149,7 +149,10 @@ const MyRacerProfile: React.FC = () => {
     }
   };
   
-  if (isProfileLoading || isLoading) {
+  // Use combined loading state from both sources
+  const combinedLoading = isProfileLoading || isLoading;
+  
+  if (combinedLoading) {
     return (
       <MainLayout>
         <div className="container mx-auto px-4 py-16 text-center">

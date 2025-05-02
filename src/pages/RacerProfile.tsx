@@ -49,6 +49,8 @@ const RacerProfile: React.FC = () => {
         try {
           setLoadingProfile(true);
           await fetchRacerById(id);
+          
+          // Use mock friendship status for now
           const status = await checkFriendship(id);
           setFriendshipStatus(status);
         } catch (error) {
@@ -325,7 +327,9 @@ const RacerProfile: React.FC = () => {
                           <div>
                             <p className="text-xs text-gray-400">Safety Rating</p>
                             <p className="text-xl font-bold">
-                              {typeof stats.sr === 'number' ? stats.sr.toFixed(2) : '-'}
+                              {typeof stats.sr === 'number' && stats.sr !== null 
+                                ? stats.sr.toFixed(2) 
+                                : '-'}
                             </p>
                           </div>
                           <div>

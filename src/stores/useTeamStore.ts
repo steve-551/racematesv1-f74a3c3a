@@ -150,8 +150,8 @@ const MOCK_TEAM_EVENTS: TeamEvent[] = [
     title: 'Weekly Team Practice',
     description: 'Regular practice session for the upcoming endurance race',
     event_type: 'practice',
-    start_time: '2023-06-10T18:00:00Z',
-    end_time: '2023-06-10T20:00:00Z',
+    start_time: '2025-06-10T18:00:00Z',
+    end_time: '2025-06-10T20:00:00Z',
     created_at: '2023-06-01T12:00:00Z',
     updated_at: '2023-06-01T12:00:00Z'
   }
@@ -170,14 +170,16 @@ export const useTeamStore = create<TeamState>((set, get) => ({
     try {
       set({ isLoading: true, error: null });
       
-      // Use mock data as workaround for Supabase errors
+      // Use mock data
       set({ teams: MOCK_TEAMS, isLoading: false });
+      return Promise.resolve();
       
     } catch (error: any) {
       console.error('Error fetching teams:', error);
       set({ error: error.message, isLoading: false });
       // Use mock data as fallback
       set({ teams: MOCK_TEAMS, isLoading: false });
+      return Promise.reject(error);
     }
   },
 
@@ -196,9 +198,11 @@ export const useTeamStore = create<TeamState>((set, get) => ({
         set({ teamMembers, teamEvents });
       }
       
+      return Promise.resolve();
     } catch (error: any) {
       console.error('Error fetching team by ID:', error);
       set({ error: error.message, isLoading: false });
+      return Promise.reject(error);
     }
   },
 
@@ -209,10 +213,12 @@ export const useTeamStore = create<TeamState>((set, get) => ({
       // Use mock team members 
       const teamMembers = MOCK_TEAM_MEMBERS.filter(member => member.team_id === teamId);
       set({ teamMembers, isLoading: false });
+      return Promise.resolve();
       
     } catch (error: any) {
       console.error('Error fetching team members:', error);
       set({ error: error.message, isLoading: false });
+      return Promise.reject(error);
     }
   },
 
@@ -223,10 +229,12 @@ export const useTeamStore = create<TeamState>((set, get) => ({
       // Use mock team events
       const teamEvents = MOCK_TEAM_EVENTS.filter(event => event.team_id === teamId);
       set({ teamEvents, isLoading: false });
+      return Promise.resolve();
       
     } catch (error: any) {
       console.error('Error fetching team events:', error);
       set({ error: error.message, isLoading: false });
+      return Promise.reject(error);
     }
   },
 
@@ -236,10 +244,12 @@ export const useTeamStore = create<TeamState>((set, get) => ({
       
       // Use mock data for suggested teams
       set({ suggestedTeams: MOCK_TEAMS.slice(0, 2), isLoading: false });
+      return Promise.resolve();
       
     } catch (error: any) {
       console.error('Error fetching suggested teams:', error);
       set({ error: error.message, isLoading: false });
+      return Promise.reject(error);
     }
   },
 
@@ -316,11 +326,13 @@ export const useTeamStore = create<TeamState>((set, get) => ({
       }));
       
       toast.success('Team updated successfully!');
+      return Promise.resolve();
       
     } catch (error: any) {
       console.error('Error updating team:', error);
       set({ error: error.message, isLoading: false });
       toast.error('Failed to update team');
+      return Promise.reject(error);
     }
   },
 
@@ -369,11 +381,13 @@ export const useTeamStore = create<TeamState>((set, get) => ({
       }));
       
       toast.success('Event updated successfully!');
+      return Promise.resolve();
       
     } catch (error: any) {
       console.error('Error updating team event:', error);
       set({ error: error.message, isLoading: false });
       toast.error('Failed to update event');
+      return Promise.reject(error);
     }
   },
 
@@ -387,11 +401,13 @@ export const useTeamStore = create<TeamState>((set, get) => ({
       }));
       
       toast.success('Event deleted successfully!');
+      return Promise.resolve();
       
     } catch (error: any) {
       console.error('Error deleting team event:', error);
       set({ error: error.message, isLoading: false });
       toast.error('Failed to delete event');
+      return Promise.reject(error);
     }
   },
 
@@ -413,11 +429,13 @@ export const useTeamStore = create<TeamState>((set, get) => ({
       }));
       
       toast.success('Team member added successfully!');
+      return Promise.resolve();
       
     } catch (error: any) {
       console.error('Error adding team member:', error);
       set({ error: error.message, isLoading: false });
       toast.error('Failed to add team member');
+      return Promise.reject(error);
     }
   },
 
@@ -431,11 +449,13 @@ export const useTeamStore = create<TeamState>((set, get) => ({
       }));
       
       toast.success('Team member removed successfully!');
+      return Promise.resolve();
       
     } catch (error: any) {
       console.error('Error removing team member:', error);
       set({ error: error.message, isLoading: false });
       toast.error('Failed to remove team member');
+      return Promise.reject(error);
     }
   },
 
@@ -458,11 +478,13 @@ export const useTeamStore = create<TeamState>((set, get) => ({
       }));
       
       toast.success('Joined team successfully!');
+      return Promise.resolve();
       
     } catch (error: any) {
       console.error('Error joining team:', error);
       set({ error: error.message, isLoading: false });
       toast.error('Failed to join team');
+      return Promise.reject(error);
     }
   },
 
@@ -478,11 +500,13 @@ export const useTeamStore = create<TeamState>((set, get) => ({
       }));
       
       toast.success('Left team successfully!');
+      return Promise.resolve();
       
     } catch (error: any) {
       console.error('Error leaving team:', error);
       set({ error: error.message, isLoading: false });
       toast.error('Failed to leave team');
+      return Promise.reject(error);
     }
   }
 }));

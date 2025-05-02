@@ -35,77 +35,72 @@ export const ProfileProvider = ({ children }: { children: React.ReactNode }) => 
   const [userTeams, setUserTeams] = useState<Team[]>([]);
   const [fetchError, setFetchError] = useState<string | null>(null);
 
-  // Fetch profile on mount if user is logged in
+  // Fetch profile on mount or when user changes
   useEffect(() => {
-    if (user && !hasAttemptedProfileFetch) {
-      const fetchProfile = async () => {
-        try {
-          await fetchCurrentRacerProfile();
-          setFetchError(null);
-        } catch (error) {
-          console.error("Failed to fetch racer profile:", error);
-          setFetchError("Failed to load profile data");
-          toast.error("Failed to load your profile data");
-        } finally {
-          setHasAttemptedProfileFetch(true);
-        }
-      };
-      
+    const fetchProfile = async () => {
+      try {
+        // Use mock data or fetch from API
+        await fetchCurrentRacerProfile();
+        setFetchError(null);
+        setHasAttemptedProfileFetch(true);
+      } catch (error) {
+        console.error("Failed to fetch racer profile:", error);
+        setFetchError("Failed to load profile data");
+        toast.error("Failed to load your profile data");
+        setHasAttemptedProfileFetch(true);
+      }
+    };
+    
+    // Always fetch in development mode for easier testing
+    if (!hasAttemptedProfileFetch || user) {
       fetchProfile();
-    } else if (!user) {
-      setHasAttemptedProfileFetch(false);
     }
   }, [user, fetchCurrentRacerProfile, hasAttemptedProfileFetch]);
   
-  // Fetch teams on mount if user is logged in
+  // Fetch teams on mount or when user changes
   useEffect(() => {
-    if (user && !hasAttemptedTeamsFetch) {
-      const fetchUserTeams = async () => {
-        try {
-          await fetchTeams();
-        } catch (error) {
-          console.error("Failed to fetch teams:", error);
-          // Don't show toast here since it's already being shown from fetchTeams
-        } finally {
-          setHasAttemptedTeamsFetch(true);
-        }
-      };
-      
+    const fetchUserTeams = async () => {
+      try {
+        await fetchTeams();
+        setHasAttemptedTeamsFetch(true);
+      } catch (error) {
+        console.error("Failed to fetch teams:", error);
+        setHasAttemptedTeamsFetch(true);
+      }
+    };
+    
+    // Always fetch in development mode for easier testing
+    if (!hasAttemptedTeamsFetch || user) {
       fetchUserTeams();
-    } else if (!user) {
-      setHasAttemptedTeamsFetch(false);
     }
   }, [user, fetchTeams, hasAttemptedTeamsFetch]);
   
   // Filter teams the user is a member of
   useEffect(() => {
-    if (teams.length > 0 && user) {
+    if (teams.length > 0) {
       // In a real app, we would fetch team_members to determine which teams the user belongs to
-      // For now, we'll just use mock data
+      // For now, we'll use the first two teams from mock data for demonstration
       setUserTeams(teams.filter((_, index) => index < 2));
     }
   }, [teams, user]);
   
   const refreshUserTeams = async () => {
-    if (user) {
-      try {
-        await fetchTeams();
-        return Promise.resolve();
-      } catch (error) {
-        console.error("Failed to refresh teams:", error);
-        toast.error("Failed to refresh your teams data");
-        return Promise.reject(error);
-      }
+    try {
+      await fetchTeams();
+      return Promise.resolve();
+    } catch (error) {
+      console.error("Failed to refresh teams:", error);
+      toast.error("Failed to refresh your teams data");
+      return Promise.reject(error);
     }
-    return Promise.resolve();
   };
 
   const contextValue: ProfileContextType = {
-    isProfileLoading: isLoading || (user && !hasAttemptedProfileFetch),
+    isProfileLoading: isLoading && !hasAttemptedProfileFetch,
     hasProfile: !!currentRacer,
     isAuthenticated: !!user,
     userTeams: userTeams,
-    isLoadingTeams: isTeamsLoading || (user && !hasAttemptedTeamsFetch),
+    isLoadingTeams: isTeamsLoading && !hasAttemptedTeamsFetch,
     refreshUserTeams
   };
 

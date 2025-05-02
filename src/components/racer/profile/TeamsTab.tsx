@@ -24,8 +24,8 @@ const TeamsTab: React.FC<TeamsTabProps> = ({ userTeams }) => {
   };
 
   const handleFindTeam = () => {
-    navigate('/find-racers');
-    toast.info('Navigated to Find Racers page where you can find teams');
+    navigate('/teams');
+    toast.info('Navigated to Teams page where you can browse teams');
   };
 
   return (

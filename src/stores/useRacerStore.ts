@@ -1,3 +1,4 @@
+
 import { create } from 'zustand';
 import { supabase } from '@/lib/supabaseClient';
 
@@ -54,6 +55,11 @@ export interface Racer {
     dirt_road: RacerStats;
     rx: RacerStats;
   };
+  // Optional - some racers might have this data directly
+  iracing_stats?: {
+    safety_rating?: number | string | null;
+    irating?: number | null;
+  };
 }
 
 interface RacerFilter {
@@ -106,6 +112,9 @@ export const useRacerStore = create<RacerStore>((set, get) => ({
         const mockRacer = MOCK_RACERS.find((r) => r.id === id);
         if (mockRacer) {
           set({ currentRacer: mockRacer, isLoading: false });
+        } else {
+          // If no specific racer found, return the first one (for demo purposes)
+          set({ currentRacer: MOCK_RACERS[0], isLoading: false });
         }
         return;
       }
@@ -169,6 +178,14 @@ export const useRacerStore = create<RacerStore>((set, get) => ({
   fetchCurrentRacerProfile: async () => {
     try {
       set({ isLoading: true, error: null });
+      const { mockMode } = get();
+
+      if (mockMode) {
+        // In mock mode, always return the first racer as current
+        set({ currentRacer: MOCK_RACERS[0], isLoading: false });
+        return;
+      }
+      
       const { data: { user }, error } = await supabase.auth.getUser();
 
       if (error || !user) {
@@ -231,26 +248,18 @@ export const useRacerStore = create<RacerStore>((set, get) => ({
         return;
       }
 
-      // Convert display_name to username for the database
-      const { display_name, ...otherData } = profileData;
-      const dataToUpdate = {
-        username: display_name,
-        ...otherData
+      // In mock mode, just update the local state
+      const updatedRacer = {
+        ...currentRacer,
+        ...profileData
       };
 
-      const { error } = await supabase
-        .from('profiles')
-        .update(dataToUpdate)
-        .eq('id', currentRacer.id);
+      set({ 
+        currentRacer: updatedRacer, 
+        isLoading: false 
+      });
 
-      if (error) {
-        console.error('Failed to update racer profile:', error.message);
-        set({ error: error.message, isLoading: false });
-        return;
-      }
-
-      // Refresh the racer profile
-      await get().fetchRacerById(currentRacer.id);
+      // Real Supabase implementation would go here
     } catch (error) {
       console.error('Unexpected error in updateRacerProfile:', error);
       set({ error: 'An unexpected error occurred', isLoading: false });
@@ -267,22 +276,13 @@ export const useRacerStore = create<RacerStore>((set, get) => ({
         return;
       }
 
-      const { error } = await supabase
-        .from('profiles')
-        .update({ looking_for_team: value })
-        .eq('id', currentRacer.id);
-
-      if (error) {
-        console.error('Failed to toggle looking for team status:', error.message);
-        set({ error: error.message, isLoading: false });
-        return;
-      }
-
       // Update the local state
       set({
         currentRacer: { ...currentRacer, looking_for_team: value },
         isLoading: false
       });
+
+      // Real Supabase implementation would go here
     } catch (error) {
       console.error('Unexpected error in toggleLookingForTeam:', error);
       set({ error: 'An unexpected error occurred', isLoading: false });
@@ -383,6 +383,10 @@ const MOCK_RACERS: Racer[] = [
     series_focus: ['VRS GT World Championship', 'Special Events'],
     commitment_level: 'High',
     availability_hours: 20,
+    iracing_stats: {
+      safety_rating: 3.75,
+      irating: 2345
+    },
     statsByDiscipline: {
       road: { irating: 2345, sr: 3.75, licence: 'A', tt: 1800, starts: 156, wins: 12, top5: 45, avg_finish: 5.6 },
       oval: { irating: 1900, sr: 2.9, licence: 'C', tt: 1100, starts: 35, wins: 2, top5: 8, avg_finish: 10.3 },
@@ -418,6 +422,10 @@ const MOCK_RACERS: Racer[] = [
     series_focus: ['F1 Grand Prix Series', 'GT Sprint Series'],
     commitment_level: 'Medium',
     availability_hours: 15,
+    iracing_stats: {
+      safety_rating: 4.2,
+      irating: 3100
+    },
     statsByDiscipline: {
       road: { irating: 3100, sr: 4.2, licence: 'A', tt: 2200, starts: 203, wins: 31, top5: 89, avg_finish: 4.2 },
       oval: { irating: 1200, sr: 2.1, licence: 'D', tt: 900, starts: 17, wins: 0, top5: 3, avg_finish: 12.7 },
@@ -453,6 +461,10 @@ const MOCK_RACERS: Racer[] = [
     series_focus: ['Dirt Rally Championship', 'Off-road Events'],
     commitment_level: 'High',
     availability_hours: 25,
+    iracing_stats: {
+      safety_rating: 4.5,
+      irating: 2700
+    },
     statsByDiscipline: {
       road: { irating: 1800, sr: 3.0, licence: 'B', tt: 1650, starts: 87, wins: 4, top5: 21, avg_finish: 8.2 },
       oval: { irating: 0, sr: 0, licence: 'rookie', tt: 0, starts: 0, wins: 0, top5: 0, avg_finish: 0 },
