@@ -10,8 +10,8 @@ import NotFound from '@/pages/NotFound';
 import EventBrowser from '@/pages/EventBrowser';
 import SetupVault from '@/pages/SetupVault';
 import StintPlanner from '@/pages/StintPlanner';
-import { TeamsPage } from '@/pages/TeamsPage';
-import { TeamDashboard } from '@/pages/TeamDashboard';
+import TeamsPage from '@/pages/TeamsPage';
+import TeamDashboard from '@/pages/TeamDashboard';
 import NoticeBoard from '@/pages/NoticeBoard';
 
 const router = createBrowserRouter([
