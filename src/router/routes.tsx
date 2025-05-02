@@ -1,37 +1,31 @@
 
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import { Index as HomePage } from '@/pages/Index';
-import { Dashboard as DashboardPage } from '@/pages/Dashboard';
-import { FindRacers as FindRacersPage } from '@/pages/FindRacers';
-import { RacerProfile } from '@/pages/RacerProfile';
-import { MyRacerProfile } from '@/pages/MyRacerProfile';
-import { AuthPage as LoginPage } from '@/pages/AuthPage';
-import { AuthPage as SignupPage } from '@/pages/AuthPage';
-import { NotFound as NotFoundPage } from '@/pages/NotFound';
-import { EventBrowser as EventsPage } from '@/pages/EventBrowser';
-import { NotFound as EventDetailPage } from '@/pages/NotFound';
-import { NotFound as CreateEventPage } from '@/pages/NotFound';
-import { NoticeBoard as NoticeBoardPage } from '@/pages/NoticeBoard';
-import { SetupVault as SetupsPage } from '@/pages/SetupVault';
-import { StintPlanner as StintPlannerPage } from '@/pages/StintPlanner';
+import Index from '@/pages/Index';
+import Dashboard from '@/pages/Dashboard';
+import FindRacers from '@/pages/FindRacers';
+import RacerProfile from '@/pages/RacerProfile';
+import MyRacerProfile from '@/pages/MyRacerProfile';
+import AuthPage from '@/pages/AuthPage';
+import NotFound from '@/pages/NotFound';
+import EventBrowser from '@/pages/EventBrowser';
+import SetupVault from '@/pages/SetupVault';
+import StintPlanner from '@/pages/StintPlanner';
 import { TeamsPage } from '@/pages/TeamsPage';
 import { TeamDashboard } from '@/pages/TeamDashboard';
-import { NotFound as ProfileSettings } from '@/pages/NotFound';
-import { NotFound as AccountSettings } from '@/pages/NotFound';
-import { NotFound as NotificationsPage } from '@/pages/NotFound';
+import NoticeBoard from '@/pages/NoticeBoard';
 
 const router = createBrowserRouter([
   {
     path: '/',
-    element: <HomePage />,
+    element: <Index />,
   },
   {
     path: '/dashboard',
-    element: <DashboardPage />,
+    element: <Dashboard />,
   },
   {
     path: '/find-racers',
-    element: <FindRacersPage />,
+    element: <FindRacers />,
   },
   {
     path: '/racer/:id',
@@ -43,35 +37,35 @@ const router = createBrowserRouter([
   },
   {
     path: '/login',
-    element: <LoginPage />,
+    element: <AuthPage />,
   },
   {
     path: '/signup',
-    element: <SignupPage />,
+    element: <AuthPage />,
   },
   {
     path: '/events',
-    element: <EventsPage />,
+    element: <EventBrowser />,
   },
   {
     path: '/events/create',
-    element: <CreateEventPage />,
+    element: <NotFound />,
   },
   {
     path: '/events/:id',
-    element: <EventDetailPage />,
+    element: <NotFound />,
   },
   {
     path: '/notice-board',
-    element: <NoticeBoardPage />,
+    element: <NoticeBoard />,
   },
   {
     path: '/setups',
-    element: <SetupsPage />,
+    element: <SetupVault />,
   },
   {
     path: '/stint-planner',
-    element: <StintPlannerPage />,
+    element: <StintPlanner />,
   },
   {
     path: '/teams',
@@ -83,19 +77,19 @@ const router = createBrowserRouter([
   },
   {
     path: '/settings/profile',
-    element: <ProfileSettings />,
+    element: <NotFound />,
   },
   {
     path: '/settings/account',
-    element: <AccountSettings />,
+    element: <NotFound />,
   },
   {
     path: '/notifications',
-    element: <NotificationsPage />,
+    element: <NotFound />,
   },
   {
     path: '*',
-    element: <NotFoundPage />,
+    element: <NotFound />,
   },
 ]);
 
