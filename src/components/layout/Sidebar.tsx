@@ -28,12 +28,12 @@ interface SidebarProps {
 
 const Sidebar: React.FC<SidebarProps> = ({ isOpen, onClose }) => {
   const location = useLocation();
-  const { user, logout } = useAuthStore();
+  const { user, signOut } = useAuthStore();
   const { hasProfile } = useProfile();
   
   const handleLogout = async () => {
     try {
-      await logout();
+      await signOut();
       toast.success("Logged out successfully!");
     } catch (error) {
       console.error("Logout failed:", error);

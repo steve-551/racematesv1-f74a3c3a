@@ -1,24 +1,24 @@
 
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
-import HomePage from '@/pages/HomePage';
-import DashboardPage from '@/pages/DashboardPage';
-import FindRacersPage from '@/pages/FindRacersPage';
-import RacerProfile from '@/pages/RacerProfile';
-import MyRacerProfile from '@/pages/MyRacerProfile';
-import LoginPage from '@/pages/LoginPage';
-import SignupPage from '@/pages/SignupPage';
-import NotFoundPage from '@/pages/NotFoundPage';
-import EventsPage from '@/pages/EventsPage';
-import EventDetailPage from '@/pages/EventDetailPage';
-import CreateEventPage from '@/pages/CreateEventPage';
-import NoticeBoardPage from '@/pages/NoticeBoardPage';
-import SetupsPage from '@/pages/SetupsPage';
-import StintPlannerPage from '@/pages/StintPlannerPage';
-import TeamsPage from '@/pages/TeamsPage';
-import TeamDashboard from '@/pages/TeamDashboard';
-import ProfileSettings from '@/pages/ProfileSettings';
-import AccountSettings from '@/pages/AccountSettings';
-import NotificationsPage from '@/pages/NotificationsPage';
+import { Index as HomePage } from '@/pages/Index';
+import { Dashboard as DashboardPage } from '@/pages/Dashboard';
+import { FindRacers as FindRacersPage } from '@/pages/FindRacers';
+import { RacerProfile } from '@/pages/RacerProfile';
+import { MyRacerProfile } from '@/pages/MyRacerProfile';
+import { AuthPage as LoginPage } from '@/pages/AuthPage';
+import { AuthPage as SignupPage } from '@/pages/AuthPage';
+import { NotFound as NotFoundPage } from '@/pages/NotFound';
+import { EventBrowser as EventsPage } from '@/pages/EventBrowser';
+import { NotFound as EventDetailPage } from '@/pages/NotFound';
+import { NotFound as CreateEventPage } from '@/pages/NotFound';
+import { NoticeBoard as NoticeBoardPage } from '@/pages/NoticeBoard';
+import { SetupVault as SetupsPage } from '@/pages/SetupVault';
+import { StintPlanner as StintPlannerPage } from '@/pages/StintPlanner';
+import { TeamsPage } from '@/pages/TeamsPage';
+import { TeamDashboard } from '@/pages/TeamDashboard';
+import { NotFound as ProfileSettings } from '@/pages/NotFound';
+import { NotFound as AccountSettings } from '@/pages/NotFound';
+import { NotFound as NotificationsPage } from '@/pages/NotFound';
 
 const router = createBrowserRouter([
   {
